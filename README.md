@@ -1,3 +1,7 @@
+# Contributors
+
+Kajol Prasad and Serena Heath!
+
 # D1 starter
 
 A minimal TypeScript/Vite browser project with Deno checks and GitHub Pages deployment.
