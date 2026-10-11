@@ -23,5 +23,3 @@ Tooling adapted from the [CMPM 121 Fall 2026 S01 starter](https://github.com/ucs
   - The player has multiple chore buttons that they can click. Each chore costs a sort of stamina called Effort and gives varying levels of reward currency (maybe allowance?). The upgrades are home improvements that help the player automate certain tasks or reduce the amount of Effort they take.
 
 ## Notes
-
-Serena: In my most recent push I added working buttons. In my next push I'm gonna work on commenting it and setting it up with the command pattern for better versatility.

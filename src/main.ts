@@ -22,65 +22,121 @@ image.height = 96;
 const message = document.createElement("p");
 message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
 
-class ChoreClass {
-  name: string;
+/**
+ * An object class for a button which can be enabled/disabled. [this.button] is a publicly accessible HTMLButtonElement object with an EventListener for "click" that calls the function inputed as [operation].
+ * @param label The label for this button.
+ * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
+ * @param pay The amount of money this button pays.
+ * @param operation The function that should be called when this button is pressed.
+ */
+class DynamicButtonClass {
+  label: string;
   cost: number;
   pay: number;
+  operation;
+
   public button;
 
-  constructor(name: string, cost: number, pay: number) {
-    this.name = name;
+  constructor(
+    label: string,
+    cost: number,
+    pay: number,
+    operation: { (): void },
+  ) {
+    this.label = label;
     this.cost = cost;
     this.pay = pay;
+    this.operation = operation;
 
     this.button = document.createElement("button");
-    this.button.textContent = name;
-    this.button.addEventListener("click", () => {
-      if (effort >= this.cost) {
-        effort -= this.cost;
-        money += this.pay;
-      }
-      console.log("Clicked");
-    });
+    this.button.textContent = `${cost} Effort: ${label}`;
+    this.button.addEventListener("click", this.operation);
   }
 
-  ToggleActive(isEnabled: boolean) {
-    console.log(`isEnabled: ${isEnabled} (${typeof isEnabled})`);
+  /**
+   * Sets this buttons active state to the input [isEnabled].
+   */
+  SetActive(isEnabled: boolean) {
+    console.log(
+      `[${this.label}]: isEnabled: ${isEnabled} (${typeof isEnabled})`,
+    );
     this.button.disabled = !isEnabled;
+  }
+
+  /**
+   * Checks if this button is available based on the effort cost. Will automatically disable itself if the player doesn't have enough effort and re-enables itself when the player does have enough.
+   * @returns Returns the buttons new active state.
+   */
+  CheckAvailable(): boolean {
+    if (this.button.disabled == false && effort < this.cost) {
+      this.SetActive(false);
+    } else if (this.button.disabled == true && effort >= this.cost) {
+      this.SetActive(true);
+    }
+
+    return (this.button.disabled);
+  }
+
+  /**
+   *  Removes the buttons old operation and changes it to [newOperation].
+   * @param newOperation The new function for the button to call when pressed.
+   */
+  SetButtonOperation(newOperation: { (): void }) {
+    this.button.removeEventListener("click", this.operation);
+    this.operation = newOperation;
+    this.button.addEventListener("click", this.operation);
   }
 }
 
-const choreList: ChoreClass[] = [];
+const choreList: DynamicButtonClass[] = [];
 
-// const button = document.createElement("button");
-// button.textContent = "1 Effort: Do dishes";
-choreList.push(new ChoreClass("1 Effort: Do dishes", 1, 3));
+choreList.push(
+  new DynamicButtonClass("Do dishes", 1, 3, () => {
+    if (effort >= 1) {
+      effort -= 1;
+      money += 3;
+    }
+    console.log(`[Do dishes]: Clicked`);
+  }),
+);
 
-const effortButton = document.createElement("button");
-effortButton.textContent = "Get effort";
-effortButton.addEventListener("click", () => {
+choreList.push(
+  new DynamicButtonClass("Clean room", 5, 10, () => {
+    if (effort >= 5) {
+      effort -= 5;
+      money += 10;
+    }
+    console.log(`[Clean room]: Clicked`);
+  }),
+);
+
+//A cheater button to give me more effort
+const effortButton = new DynamicButtonClass("Get effort", 0, 0, () => {
   if (effort < maxEffort) {
     effort++;
   }
+  console.log(`[Get effort]: Clicked`);
 });
 
+// document.createElement("button");
+// effortButton.textContent = "Get effort";
+// effortButton.addEventListener("click", );
+
+/**
+ * Similar to Unity's update, this function is used in tandem with the setInterval() function to call all functions within it and update all dynamic objects everytime it is called.
+ */
 function Update() {
   message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
 
   for (let i = 0; i < choreList.length; i++) {
     const chore = choreList[i];
-    if (chore.button.disabled == false && effort < chore.cost) {
-      chore.ToggleActive(false);
-    } else if (chore.button.disabled == true && effort >= chore.cost) {
-      chore.ToggleActive(true);
-    }
+    chore.CheckAvailable();
   }
 }
+setInterval(Update, 250);
 
-app.append(heading, image, message, effortButton);
+app.append(heading, image, message, effortButton.button);
 for (let i = 0; i < choreList.length; i++) {
   const chore = choreList[i];
   app.append(chore.button);
 }
-
-setInterval(Update, 500);
