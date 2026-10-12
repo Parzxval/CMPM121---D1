@@ -8,6 +8,7 @@ const app = document.querySelector<HTMLElement>("#app")!;
 let effort: number = 10;
 // deno-lint-ignore prefer-const
 let maxEffort: number = 10;
+
 let money: number = 0;
 
 const heading = document.createElement("h1");
@@ -88,27 +89,78 @@ class DynamicButtonClass {
   }
 }
 
+/** Chore List:
+ * Do dishes,
+ * Clean room,
+ * Do laundry,
+ * Clean kitchen,
+ * Sweep/mop floors,
+ * Clean bathroom,
+ * Take out trash,
+ */
 const choreList: DynamicButtonClass[] = [];
+const choreGroup: HTMLHeadingElement = document.createElement("h2");
 
 choreList.push(
   new DynamicButtonClass("Do dishes", 1, 3, () => {
-    if (effort >= 1) {
-      effort -= 1;
-      money += 3;
-    }
+    effort -= 1;
+    money += 3;
     console.log(`[Do dishes]: Clicked`);
   }),
 );
 
 choreList.push(
   new DynamicButtonClass("Clean room", 5, 10, () => {
-    if (effort >= 5) {
-      effort -= 5;
-      money += 10;
-    }
+    effort -= 5;
+    money += 10;
     console.log(`[Clean room]: Clicked`);
   }),
 );
+
+choreList.push(
+  new DynamicButtonClass("Do laundry", 3, 5, () => {
+    effort -= 3;
+    money += 5;
+    console.log(`[Do Laundry]: Clicked`);
+  }),
+);
+
+choreList.push(
+  new DynamicButtonClass("Clean kitchen", 7, 25, () => {
+    effort -= 7;
+    money += 25;
+    console.log(`[Clean kitchen]: Clicked`);
+  }),
+);
+
+choreList.push(
+  new DynamicButtonClass("Sweep/Mop floors", 5, 10, () => {
+    effort -= 5;
+    money += 10;
+    console.log(`[Sweep/Mop floors]: Clicked`);
+  }),
+);
+
+choreList.push(
+  new DynamicButtonClass("Clean bathroom", 7, 25, () => {
+    effort -= 7;
+    money += 25;
+    console.log(`[Clean bathroom]: Clicked`);
+  }),
+);
+
+choreList.push(
+  new DynamicButtonClass("Take out trash", 2, 5, () => {
+    effort -= 2;
+    money += 5;
+    console.log(`[Take out trash]: Clicked`);
+  }),
+);
+
+for (let i = 0; i < choreList.length; i++) {
+  const chore = choreList[i];
+  choreGroup.append(chore.button);
+}
 
 //A cheater button to give me more effort
 const effortButton = new DynamicButtonClass("Get effort", 0, 0, () => {
@@ -117,10 +169,6 @@ const effortButton = new DynamicButtonClass("Get effort", 0, 0, () => {
   }
   console.log(`[Get effort]: Clicked`);
 });
-
-// document.createElement("button");
-// effortButton.textContent = "Get effort";
-// effortButton.addEventListener("click", );
 
 /**
  * Similar to Unity's update, this function is used in tandem with the setInterval() function to call all functions within it and update all dynamic objects everytime it is called.
@@ -135,8 +183,4 @@ function Update() {
 }
 setInterval(Update, 250);
 
-app.append(heading, image, message, effortButton.button);
-for (let i = 0; i < choreList.length; i++) {
-  const chore = choreList[i];
-  app.append(chore.button);
-}
+app.append(heading, image, message, effortButton.button, choreGroup);
