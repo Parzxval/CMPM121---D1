@@ -6,12 +6,10 @@ import tileUrl from "./assets/tile.svg?no-inline";
 const app = document.querySelector<HTMLElement>("#app")!;
 
 let effort: number = 10;
-// deno-lint-ignore prefer-const
 let maxEffort: number = 10;
-let recoveryTime = 15;
-// deno-lint-ignore prefer-const
+let recoveryTime = -1;
 let maxRecoveryTime = 15;
-const recoveryAmount = 4;
+let recoveryAmount = 2;
 
 let money: number = 0;
 
@@ -166,6 +164,50 @@ for (let i = 0; i < choreList.length; i++) {
   choreGroup.append(chore.button);
 }
 
+const upgradeList: DynamicButtonClass[] = [];
+const upgradeGroup: HTMLHeadingElement = document.createElement("h2");
+
+upgradeList.push(
+  new DynamicButtonClass("Upgrade recovery amount", 0, 0, () => {
+    if (money >= 50) {
+      money -= 50;
+      console.log(
+        `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
+      );
+      recoveryAmount += 2;
+    }
+  }),
+);
+
+upgradeList.push(
+  new DynamicButtonClass("Upgrade recovery speed", 0, 0, () => {
+    if (money >= 50) {
+      money -= 50;
+      console.log(
+        `[recoveryTime]: Upgraded ${maxRecoveryTime} -> ${maxRecoveryTime - 3}`,
+      );
+      maxRecoveryTime -= 3;
+    }
+  }),
+);
+
+upgradeList.push(
+  new DynamicButtonClass("Upgrade maximum effort", 0, 0, () => {
+    if (money >= 50) {
+      money -= 50;
+      console.log(
+        `[maxEffort]: Upgraded ${maxEffort} -> ${maxEffort - 3}`,
+      );
+      maxEffort += 2;
+    }
+  }),
+);
+
+for (let i = 0; i < upgradeList.length; i++) {
+  const upgrade = upgradeList[i];
+  upgradeGroup.append(upgrade.button);
+}
+
 //A cheater button to give me more effort
 const effortButton = new DynamicButtonClass("Get effort", 0, 0, () => {
   if (effort < maxEffort) {
@@ -185,6 +227,9 @@ function RecoverEffort() {
   if (recoveryTime <= 0) {
     recoveryTime = maxRecoveryTime;
     const effortDif = maxEffort - effort;
+    console.log(
+      `Recovering ${(effortDif < recoveryAmount) ? effortDif : recoveryAmount}`,
+    );
     effort += (effortDif < recoveryAmount) ? effortDif : recoveryAmount;
     return;
   }
@@ -198,7 +243,7 @@ function RecoverEffort() {
 function Update() {
   if (effort >= maxEffort) {
     message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
-  } else {
+  } else if (recoveryTime >= 0) {
     message.textContent =
       `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money}`;
   }
@@ -207,8 +252,17 @@ function Update() {
     const chore = choreList[i];
     chore.CheckAvailable();
   }
+
+  console.log(effort);
 }
 setInterval(Update, 250);
-setInterval(RecoverEffort, 1000);
+setInterval(RecoverEffort, (maxRecoveryTime < 1) ? 250 : 1000);
 
-app.append(heading, image, message, effortButton.button, choreGroup);
+app.append(
+  heading,
+  image,
+  message,
+  effortButton.button,
+  choreGroup,
+  upgradeGroup,
+);
