@@ -8,6 +8,10 @@ const app = document.querySelector<HTMLElement>("#app")!;
 let effort: number = 10;
 // deno-lint-ignore prefer-const
 let maxEffort: number = 10;
+let recoveryTime = 15;
+// deno-lint-ignore prefer-const
+let maxRecoveryTime = 15;
+const recoveryAmount = 2;
 
 let money: number = 0;
 
@@ -110,10 +114,10 @@ choreList.push(
 );
 
 choreList.push(
-  new DynamicButtonClass("Clean room", 5, 10, () => {
-    effort -= 5;
-    money += 10;
-    console.log(`[Clean room]: Clicked`);
+  new DynamicButtonClass("Take out trash", 2, 5, () => {
+    effort -= 2;
+    money += 5;
+    console.log(`[Take out trash]: Clicked`);
   }),
 );
 
@@ -126,10 +130,10 @@ choreList.push(
 );
 
 choreList.push(
-  new DynamicButtonClass("Clean kitchen", 7, 25, () => {
-    effort -= 7;
-    money += 25;
-    console.log(`[Clean kitchen]: Clicked`);
+  new DynamicButtonClass("Clean room", 5, 10, () => {
+    effort -= 5;
+    money += 10;
+    console.log(`[Clean room]: Clicked`);
   }),
 );
 
@@ -142,18 +146,18 @@ choreList.push(
 );
 
 choreList.push(
-  new DynamicButtonClass("Clean bathroom", 7, 25, () => {
+  new DynamicButtonClass("Clean kitchen", 7, 25, () => {
     effort -= 7;
     money += 25;
-    console.log(`[Clean bathroom]: Clicked`);
+    console.log(`[Clean kitchen]: Clicked`);
   }),
 );
 
 choreList.push(
-  new DynamicButtonClass("Take out trash", 2, 5, () => {
-    effort -= 2;
-    money += 5;
-    console.log(`[Take out trash]: Clicked`);
+  new DynamicButtonClass("Clean bathroom", 7, 25, () => {
+    effort -= 7;
+    money += 25;
+    console.log(`[Clean bathroom]: Clicked`);
   }),
 );
 
@@ -171,10 +175,32 @@ const effortButton = new DynamicButtonClass("Get effort", 0, 0, () => {
 });
 
 /**
+ * When [effort] is less than [maxEffort], counts down on [recoveryTime]. When it reaches zero, it adds [recoveryAmount] back to the [effort] pool.
+ */
+function RecoverEffort() {
+  if (effort == maxEffort) {
+    return;
+  }
+
+  if (recoveryTime <= 0) {
+    recoveryTime = maxRecoveryTime;
+    effort += recoveryAmount;
+    return;
+  }
+
+  recoveryTime--;
+}
+
+/**
  * Similar to Unity's update, this function is used in tandem with the setInterval() function to call all functions within it and update all dynamic objects everytime it is called.
  */
 function Update() {
-  message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
+  if (effort >= maxEffort) {
+    message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
+  } else {
+    message.textContent =
+      `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money}`;
+  }
 
   for (let i = 0; i < choreList.length; i++) {
     const chore = choreList[i];
@@ -182,5 +208,6 @@ function Update() {
   }
 }
 setInterval(Update, 250);
+setInterval(RecoverEffort, 1000);
 
 app.append(heading, image, message, effortButton.button, choreGroup);
