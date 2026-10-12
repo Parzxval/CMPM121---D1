@@ -11,7 +11,7 @@ let maxEffort: number = 10;
 let recoveryTime = 15;
 // deno-lint-ignore prefer-const
 let maxRecoveryTime = 15;
-const recoveryAmount = 2;
+const recoveryAmount = 4;
 
 let money: number = 0;
 
@@ -184,7 +184,8 @@ function RecoverEffort() {
 
   if (recoveryTime <= 0) {
     recoveryTime = maxRecoveryTime;
-    effort += recoveryAmount;
+    const effortDif = maxEffort - effort;
+    effort += (effortDif < recoveryAmount) ? effortDif : recoveryAmount;
     return;
   }
 
