@@ -4,6 +4,8 @@
 import tileUrl from "./assets/tile.svg?no-inline";
 
 const app = document.querySelector<HTMLElement>("#app")!;
+// How many seconds should the game wait between updates?
+const updateSpeed: number = 0.25; // seconds
 
 let effort: number = 10;
 let maxEffort: number = 10;
@@ -395,7 +397,7 @@ function RecoverEffort() {
     return;
   }
 
-  recoveryTime--;
+  recoveryTime -= updateSpeed;
 }
 
 /**
@@ -407,12 +409,15 @@ function Update() {
       `Effort: ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
         XpNeededForLevel(level + 1) - xp
       }`;
-  } else if (recoveryTime >= 0) {
-    message.textContent =
-      `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
-        XpNeededForLevel(level + 1) - xp
-      }`;
+  } else if (recoveryTime > 0) {
+    message.textContent = `Effort (${
+      Math.floor(recoveryTime)
+    }): ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
+      XpNeededForLevel(level + 1) - xp
+    }`;
   }
+
+  RecoverEffort();
 
   for (let i = 0; i < choreList.length; i++) {
     const chore = choreList[i];
@@ -424,8 +429,7 @@ function Update() {
     upgrade.Update();
   }
 }
-setInterval(Update, 250);
-setInterval(RecoverEffort, (maxRecoveryTime < 1) ? 250 : 1000);
+setInterval(Update, updateSpeed * 1000);
 
 app.append(
   heading,
