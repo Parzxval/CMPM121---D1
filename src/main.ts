@@ -242,9 +242,10 @@ class PurchasableClass extends DynamicButtonClass {
     console.log(`[${this.label}]: Clicked`);
 
     if (this.IsAffordable() == true && this.IsUnlocked() == true) {
-      effort -= this.cost;
-
-      UpdateLevel();
+      money -= this.cost;
+      this.rewardFunc();
+      if (this.amountAvailable > 0) this.amountAvailable -= 1;
+      this.cost = Math.floor(this.cost * this.priceScaling);
     }
   }
 
