@@ -13,8 +13,13 @@ let maxRecoveryTime = 15;
 let recoveryTime = maxRecoveryTime;
 // deno-lint-ignore prefer-const
 let recoveryAmount = 2;
+// deno-lint-ignore prefer-const
+let base = 3; //Level lvl costs base * lvl; adjust accordingly.
 
 let money: number = 0;
+
+let xp: number = 0;
+let level: number = 0;
 
 const heading = document.createElement("h1");
 heading.textContent = "D1 project";
@@ -26,7 +31,10 @@ image.width = 96;
 image.height = 96;
 
 const message = document.createElement("p");
-message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
+message.textContent =
+  `Effort: ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
+    XpNeededForLevel(level + 1) - xp
+  }`;
 
 /**
  * An object class for a button which can be enabled/disabled. [this.button] is a publicly accessible HTMLButtonElement object with an EventListener for "click" that calls the function inputed as [operation].
@@ -66,15 +74,27 @@ class DynamicButtonClass {
  * @param label The label for this button.
  * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
  * @param pay The amount of money this button pays.
+ * @param xp The amount of xp this action gives.
+ * @param levelUnlocked The minimum level needed to unlock this task.
  */
 class TaskClass extends DynamicButtonClass {
   cost: number;
   pay: number;
+  xp: number;
+  levelUnlocked: number;
 
-  constructor(label: string, taskCost: number, taskPay: number) {
+  constructor(
+    label: string,
+    taskCost: number,
+    taskPay: number,
+    taskXP: number,
+    taskLevel: number,
+  ) {
     super(label);
     this.cost = taskCost;
     this.pay = taskPay;
+    this.xp = taskXP;
+    this.levelUnlocked = taskLevel;
 
     this.button.addEventListener("click", () => {
       this.Execute();
@@ -85,6 +105,10 @@ class TaskClass extends DynamicButtonClass {
     return (effort >= this.cost);
   }
 
+  IsUnlocked(): boolean {
+    return (level >= this.levelUnlocked);
+  }
+
   /**
    * Checks if this button is available.
    * Will automatically disable itself, if the checker returns false; and re-enable itself,
@@ -93,10 +117,16 @@ class TaskClass extends DynamicButtonClass {
    */
   CheckAvailable(): boolean {
     const isAffordable: boolean = this.IsAffordable();
+    const isUnlocked: boolean = this.IsUnlocked();
 
-    if (this.button.disabled == true && isAffordable == true) {
+    if (
+      this.button.disabled == true && isAffordable == true && isUnlocked == true
+    ) {
       this.SetActive(true);
-    } else if (this.button.disabled == false && isAffordable == false) {
+    } else if (
+      this.button.disabled == false &&
+      (isAffordable == false || isUnlocked == false)
+    ) {
       this.SetActive(false);
     }
     /* I could just have:
@@ -109,9 +139,12 @@ class TaskClass extends DynamicButtonClass {
   Execute() {
     console.log(`[${this.label}]: Clicked`);
 
-    if (this.IsAffordable() == true) {
+    if (this.IsAffordable() == true && this.IsUnlocked() == true) {
       effort -= this.cost;
       money += this.pay;
+      xp += this.xp;
+
+      UpdateLevel();
     }
   }
 }
@@ -128,19 +161,19 @@ class TaskClass extends DynamicButtonClass {
 const choreList: TaskClass[] = [];
 const choreGroup: HTMLHeadingElement = document.createElement("h2");
 
-choreList.push(new TaskClass("Do dishes", 1, 3));
+choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0));
 
-choreList.push(new TaskClass("Take out trash", 2, 5));
+choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1));
 
-choreList.push(new TaskClass("Do laundry", 2, 5));
+choreList.push(new TaskClass("Do laundry", 2, 5, 2, 2));
 
-choreList.push(new TaskClass("Clean room", 5, 10));
+choreList.push(new TaskClass("Clean room", 5, 10, 2, 3));
 
-choreList.push(new TaskClass("Clean floors", 5, 10));
+choreList.push(new TaskClass("Clean floors", 5, 10, 3, 4));
 
-choreList.push(new TaskClass("Clean kitchen", 7, 25));
+choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5));
 
-choreList.push(new TaskClass("Clean bathroom", 7, 25));
+choreList.push(new TaskClass("Clean bathroom", 7, 25, 5, 6));
 
 for (let i = 0; i < choreList.length; i++) {
   const chore = choreList[i];
@@ -202,6 +235,24 @@ effortButton.addEventListener("click", () => {
 });
 
 /**
+ * Checks xp against xpToLevel() helper function; if xp is greater than or equal to, adds a level and logs level update.
+ */
+function UpdateLevel() {
+  while (xp >= XpNeededForLevel(level + 1)) {
+    level++;
+    console.log(`Level-up to level ${level} with ${xp} total xp`);
+  }
+}
+
+/**
+ * Calculates and returns the number of XP needed for a given level; base xp can be altered to change the xp requirement for the first level.
+ */
+function XpNeededForLevel(lvl: number): number {
+  const xpNeeded = base * lvl * (lvl + 1) / 2;
+  return xpNeeded;
+}
+
+/**
  * When [effort] is less than [maxEffort], counts down on [recoveryTime]. When it reaches zero, it adds [recoveryAmount] back to the [effort] pool.
  */
 function RecoverEffort() {
@@ -227,10 +278,15 @@ function RecoverEffort() {
  */
 function Update() {
   if (effort >= maxEffort) {
-    message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
+    message.textContent =
+      `Effort: ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
+        XpNeededForLevel(level + 1) - xp
+      }`;
   } else if (recoveryTime >= 0) {
     message.textContent =
-      `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money}`;
+      `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
+        XpNeededForLevel(level + 1) - xp
+      }`;
   }
 
   for (let i = 0; i < choreList.length; i++) {
