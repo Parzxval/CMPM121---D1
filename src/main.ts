@@ -6,12 +6,10 @@ import tileUrl from "./assets/tile.svg?no-inline";
 const app = document.querySelector<HTMLElement>("#app")!;
 
 let effort: number = 10;
-// deno-lint-ignore prefer-const
 let maxEffort: number = 10;
-// deno-lint-ignore prefer-const
+
 let maxRecoveryTime = 15;
 let recoveryTime = maxRecoveryTime;
-// deno-lint-ignore prefer-const
 let recoveryAmount = 2;
 
 let money: number = 0;
@@ -57,11 +55,13 @@ class DynamicButtonClass {
     );
     this.button.disabled = !isEnabled;
   }
+
+  toString() {
+    return (this.label);
+  }
 }
 
 /**
- * **New**
- *
  * A class for all of the tasks that automatically applies the event listener.
  * @param label The label for this button.
  * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
@@ -79,6 +79,7 @@ class TaskClass extends DynamicButtonClass {
     this.button.addEventListener("click", () => {
       this.Execute();
     });
+    this.button.textContent = `${this.label} (${this.cost}E -> $${this.pay})`;
   }
 
   IsAffordable(): boolean {
@@ -114,6 +115,100 @@ class TaskClass extends DynamicButtonClass {
       money += this.pay;
     }
   }
+
+  Update() {
+    this.CheckAvailable();
+  }
+}
+
+/**
+ * A class for all of the purchasables (upgrades and items) that automatically applies the event listener, tracks availability,
+ * and scales cost.
+ * @param label The label for this button.
+ * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
+ * @param rewardFunc The function that should be run when this object is purchased.
+ * @param priceScaling An optional parameter to set how the price scales with each purchase. Default: 1.5
+ * @param amountAvailable An optional parameter to set how many are available to purchase. Will delete when it reaches zero.
+ * Default: -1 which stands for infinite.
+ */
+class PurchasableClass extends DynamicButtonClass {
+  cost: number;
+  rewardFunc: { (): void };
+  amountAvailable: number;
+  priceScaling: number;
+
+  constructor(
+    label: string,
+    cost: number,
+    rewardFunc: { (): void },
+    priceScaling: number = 1.5,
+    amountAvailable: number = -1,
+  ) {
+    super(label);
+    this.cost = cost;
+    this.rewardFunc = rewardFunc;
+    this.amountAvailable = amountAvailable;
+    this.priceScaling = priceScaling;
+
+    this.button.addEventListener("click", () => {
+      this.Execute();
+    });
+  }
+
+  IsAffordable(): boolean {
+    return (money >= this.cost && this.amountAvailable != 0);
+  }
+
+  /**
+   * Not only checks if the player has enough money to buy it, but also checks if there is available stock.
+   * Will automatically disavble the button if there isn't enough money and delete the button if there is no
+   * more left in stock.
+   */
+  CheckAvailable(): boolean {
+    const isAffordable: boolean = this.IsAffordable();
+
+    if (this.button.disabled == true && isAffordable == true) {
+      this.SetActive(true);
+    } else if (this.button.disabled == false && isAffordable == false) {
+      this.SetActive(false);
+    }
+    /* I could just have:
+     *    this.setActive(isAffordable);
+     * but I wanted it to only run if there is a change instead of every update.
+     */
+
+    if (this.amountAvailable == 0) {
+      for (let i = 0; i < upgradeList.length; i++) {
+        const upgrade = upgradeList[i];
+        if (upgrade.label == this.label) {
+          upgradeList.splice(i, 1);
+          upgradeGroup.removeChild(this.button);
+          break;
+        }
+      }
+    }
+
+    return isAffordable;
+  }
+
+  Execute() {
+    console.log(`[${this.label}]: Clicked`);
+
+    if (this.IsAffordable() == true) {
+      money -= this.cost;
+      if (this.amountAvailable > 0) this.amountAvailable -= 1;
+      this.cost = Math.floor(this.cost * this.priceScaling);
+
+      this.rewardFunc();
+    }
+  }
+
+  // Called by the global Update() to update button text and availablility
+  Update() {
+    this.CheckAvailable();
+
+    this.button.textContent = `$${this.cost}: ${this.label}`;
+  }
 }
 
 /** Chore List:
@@ -147,44 +242,39 @@ for (let i = 0; i < choreList.length; i++) {
   choreGroup.append(chore.button);
 }
 
-const upgradeList: DynamicButtonClass[] = [];
+const upgradeList: PurchasableClass[] = [];
 const upgradeGroup: HTMLHeadingElement = document.createElement("h2");
 
-// upgradeList.push(
-//   new DynamicButtonClass("Upgrade recovery amount", 0, 0, () => {
-//     if (money >= 50) {
-//       money -= 50;
-//       console.log(
-//         `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
-//       );
-//       recoveryAmount += 2;
-//     }
-//   }),
-// );
+upgradeList.push(
+  new PurchasableClass("Upgrade recovery amount", 20, () => {
+    console.log(
+      `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
+    );
+    recoveryAmount += 2;
+  }, 2),
+);
 
-// upgradeList.push(
-//   new DynamicButtonClass("Upgrade recovery speed", 0, 0, () => {
-//     if (money >= 50) {
-//       money -= 50;
-//       console.log(
-//         `[recoveryTime]: Upgraded ${maxRecoveryTime} -> ${maxRecoveryTime - 3}`,
-//       );
-//       maxRecoveryTime -= 3;
-//     }
-//   }),
-// );
+upgradeList.push(
+  new PurchasableClass(
+    "Upgrade recovery time",
+    30,
+    () => {
+      console.log(
+        `[recoveryTime]: Upgraded ${maxRecoveryTime} -> ${maxRecoveryTime - 3}`,
+      );
+      maxRecoveryTime -= 3;
+    },
+    2,
+    4,
+  ),
+);
 
-// upgradeList.push(
-//   new DynamicButtonClass("Upgrade maximum effort", 0, 0, () => {
-//     if (money >= 50) {
-//       money -= 50;
-//       console.log(
-//         `[maxEffort]: Upgraded ${maxEffort} -> ${maxEffort - 3}`,
-//       );
-//       maxEffort += 2;
-//     }
-//   }),
-// );
+upgradeList.push(
+  new PurchasableClass("Upgrade maximum effort", 50, () => {
+    console.log(`[maxEffort]: Upgraded ${maxEffort} -> ${maxEffort - 3}`);
+    maxEffort += 5;
+  }),
+);
 
 for (let i = 0; i < upgradeList.length; i++) {
   const upgrade = upgradeList[i];
@@ -199,6 +289,13 @@ effortButton.addEventListener("click", () => {
     effort++;
   }
   console.log(`[Get effort]: Clicked`);
+});
+
+const moneyButton = document.createElement("button");
+moneyButton.textContent = "Get money";
+moneyButton.addEventListener("click", () => {
+  money += 20;
+  console.log(`[Get money]: Clicked`);
 });
 
 /**
@@ -226,19 +323,22 @@ function RecoverEffort() {
  * Similar to Unity's update, this function is used in tandem with the setInterval() function to call all functions within it and update all dynamic objects everytime it is called.
  */
 function Update() {
-  if (effort >= maxEffort) {
-    message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
-  } else if (recoveryTime >= 0) {
+  if (recoveryTime >= 0 && effort < maxEffort) {
     message.textContent =
       `Effort (${recoveryTime}): ${effort}/${maxEffort} | Money: ${money}`;
+  } else {
+    message.textContent = `Effort: ${effort}/${maxEffort} | Money: ${money}`;
   }
 
   for (let i = 0; i < choreList.length; i++) {
     const chore = choreList[i];
-    chore.CheckAvailable();
+    chore.Update();
   }
 
-  console.log(effort);
+  for (let i = 0; i < upgradeList.length; i++) {
+    const upgrade = upgradeList[i];
+    upgrade.Update();
+  }
 }
 setInterval(Update, 250);
 setInterval(RecoverEffort, (maxRecoveryTime < 1) ? 250 : 1000);
@@ -248,6 +348,7 @@ app.append(
   image,
   message,
   effortButton,
+  moneyButton,
   choreGroup,
   upgradeGroup,
 );
