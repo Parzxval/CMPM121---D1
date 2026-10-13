@@ -45,22 +45,22 @@ effortButton.addEventListener("click", () => {
   if (effort < maxEffort) {
     effort++;
   }
-  console.log(`[Get effort]: Clicked`);
+  // console.log(`[Get effort]: Clicked`);
 });
 
 const moneyButton = document.createElement("button");
 moneyButton.textContent = "Get money";
 moneyButton.addEventListener("click", () => {
   money += 20;
-  console.log(`[Get money]: Clicked`);
+  // console.log(`[Get money]: Clicked`);
 });
 
 const xpButton = document.createElement("button");
 xpButton.textContent = "Get XP";
 xpButton.addEventListener("click", () => {
-  xp += 5;
+  xp += 1000;
   UpdateLevel();
-  console.log(`[Get XP]: Clicked`);
+  // console.log(`[Get XP]: Clicked`);
 });
 
 playerUI.append(effortButton, moneyButton, xpButton);
@@ -78,6 +78,8 @@ class DynamicButtonClass {
   label: string;
   public button;
 
+  debugMode: boolean = false;
+
   constructor(label: string) {
     this.label = label;
 
@@ -89,9 +91,11 @@ class DynamicButtonClass {
    * Sets this buttons active state to the input [isEnabled].
    */
   SetActive(isEnabled: boolean) {
-    console.log(
-      `[${this.label}]: isEnabled: ${isEnabled} (${typeof isEnabled})`,
-    );
+    if (this.debugMode == true) {
+      console.log(
+        `[${this.label}]: isEnabled: ${isEnabled} (${typeof isEnabled})`,
+      );
+    }
     this.button.disabled = !isEnabled;
   }
 
@@ -169,7 +173,7 @@ class TaskClass extends DynamicButtonClass {
   }
 
   Execute() {
-    console.log(`[${this.label}]: Clicked`);
+    if (this.debugMode == true) console.log(`[${this.label}]: Clicked`);
 
     if (this.IsAffordable() == true && this.IsUnlocked() == true) {
       effort -= this.cost;
@@ -281,7 +285,7 @@ class PurchasableClass extends DynamicButtonClass {
   }
 
   Execute() {
-    console.log(`[${this.label}]: Clicked`);
+    if (this.debugMode == true) console.log(`[${this.label}]: Clicked`);
 
     if (this.IsAffordable() == true && this.IsUnlocked() == true) {
       money -= this.cost;
