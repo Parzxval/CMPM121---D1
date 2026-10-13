@@ -152,6 +152,12 @@ class TaskClass extends DynamicButtonClass {
 
   Update() {
     this.CheckAvailable();
+
+    if (this.IsUnlocked() == false) {
+      this.button.textContent = `Locked: Lvl ${this.levelUnlocked}`;
+    } else {
+      this.button.textContent = `${this.label} (${this.cost}E -> $${this.pay})`;
+    }
   }
 }
 
@@ -193,11 +199,15 @@ class PurchasableClass extends DynamicButtonClass {
   }
 
   IsAffordable(): boolean {
-    return (money >= this.cost && this.amountAvailable != 0);
+    return (money >= this.cost);
   }
 
   IsUnlocked(): boolean {
     return (level >= this.levelUnlocked);
+  }
+
+  IsInStock() {
+    return (this.amountAvailable != 0);
   }
 
   /**
@@ -208,14 +218,16 @@ class PurchasableClass extends DynamicButtonClass {
   CheckAvailable(): boolean {
     const isAffordable: boolean = this.IsAffordable();
     const isUnlocked: boolean = this.IsUnlocked();
+    const isInStock: boolean = this.IsInStock();
 
     if (
-      this.button.disabled == true && isAffordable == true && isUnlocked == true
+      this.button.disabled == true && isAffordable == true &&
+      isUnlocked == true && isInStock == true
     ) {
       this.SetActive(true);
     } else if (
       this.button.disabled == false &&
-      (isAffordable == false || isUnlocked == false)
+      (isAffordable == false || isUnlocked == false || isInStock == false)
     ) {
       this.SetActive(false);
     }
@@ -252,8 +264,11 @@ class PurchasableClass extends DynamicButtonClass {
   // Called by the global Update() to update button text and availablility
   Update() {
     this.CheckAvailable();
-
-    this.button.textContent = `$${this.cost}: ${this.label}`;
+    if (this.IsUnlocked() == false) {
+      this.button.textContent = `Locked: Lvl ${this.levelUnlocked}`;
+    } else {
+      this.button.textContent = `$${this.cost}: ${this.label}`;
+    }
   }
 }
 
