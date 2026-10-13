@@ -31,11 +31,39 @@ image.alt = "A teal tile with a cream circle";
 image.width = 96;
 image.height = 96;
 
-const message = document.createElement("p");
-message.textContent =
-  `Effort: ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
-    XpNeededForLevel(level + 1) - xp
-  }`;
+const playerUI = document.createElement("h4");
+const moneyDisplay = document.createElement("p");
+const effortDisplay = document.createElement("p");
+const expDisplay = document.createElement("p");
+const automationDisplay = document.createElement("p");
+playerUI.append(moneyDisplay, effortDisplay, expDisplay, automationDisplay);
+
+//A cheater button to give me more effort
+const effortButton = document.createElement("button");
+effortButton.textContent = "Get effort";
+effortButton.addEventListener("click", () => {
+  if (effort < maxEffort) {
+    effort++;
+  }
+  console.log(`[Get effort]: Clicked`);
+});
+
+const moneyButton = document.createElement("button");
+moneyButton.textContent = "Get money";
+moneyButton.addEventListener("click", () => {
+  money += 20;
+  console.log(`[Get money]: Clicked`);
+});
+
+const xpButton = document.createElement("button");
+xpButton.textContent = "Get XP";
+xpButton.addEventListener("click", () => {
+  xp += 5;
+  UpdateLevel();
+  console.log(`[Get XP]: Clicked`);
+});
+
+playerUI.append(effortButton, moneyButton, xpButton);
 
 /**
  * An object class for a button which can be enabled/disabled. [this.button] is a publicly accessible HTMLButtonElement object with an EventListener for "click" that calls the function inputed as [operation].
@@ -284,20 +312,17 @@ class PurchasableClass extends DynamicButtonClass {
  * Take out trash,
  */
 const choreList: TaskClass[] = [];
-const choreGroup: HTMLHeadingElement = document.createElement("h2");
+const choreGroup: HTMLHeadingElement = document.createElement("h3");
+const choreLabel = document.createElement("p");
+choreLabel.textContent = "Chores: ";
+choreGroup.append(choreLabel);
 
 choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0));
-
 choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1));
-
 choreList.push(new TaskClass("Do laundry", 2, 5, 2, 2));
-
 choreList.push(new TaskClass("Clean room", 5, 10, 2, 3));
-
 choreList.push(new TaskClass("Clean floors", 5, 10, 3, 4));
-
 choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5));
-
 choreList.push(new TaskClass("Clean bathroom", 7, 25, 5, 6));
 
 for (let i = 0; i < choreList.length; i++) {
@@ -306,7 +331,10 @@ for (let i = 0; i < choreList.length; i++) {
 }
 
 const upgradeList: PurchasableClass[] = [];
-const upgradeGroup: HTMLHeadingElement = document.createElement("h2");
+const upgradeGroup: HTMLHeadingElement = document.createElement("h3");
+const upgradeLabel = document.createElement("p");
+upgradeLabel.textContent = "Upgrades: ";
+upgradeGroup.append(upgradeLabel);
 
 upgradeList.push(
   new PurchasableClass("Upgrade recovery amount", 20, () => {
@@ -343,23 +371,6 @@ for (let i = 0; i < upgradeList.length; i++) {
   const upgrade = upgradeList[i];
   upgradeGroup.append(upgrade.button);
 }
-
-//A cheater button to give me more effort
-const effortButton = document.createElement("button");
-effortButton.textContent = "Get effort";
-effortButton.addEventListener("click", () => {
-  if (effort < maxEffort) {
-    effort++;
-  }
-  console.log(`[Get effort]: Clicked`);
-});
-
-const moneyButton = document.createElement("button");
-moneyButton.textContent = "Get money";
-moneyButton.addEventListener("click", () => {
-  money += 20;
-  console.log(`[Get money]: Clicked`);
-});
 
 /**
  * Checks xp against xpToLevel() helper function; if xp is greater than or equal to, adds a level and logs level update.
@@ -400,22 +411,22 @@ function RecoverEffort() {
   recoveryTime -= updateSpeed;
 }
 
+function DisplayStats() {
+  moneyDisplay.textContent = `Money: $${money}`;
+  effortDisplay.textContent =
+    `Effort: ${effort}/${maxEffort} | Recovery: +${recoveryAmount} in ${
+      Math.floor(recoveryTime)
+    }/${maxRecoveryTime} seconds`;
+  expDisplay.textContent = `Level: ${level} | XP to Next Level: ${
+    XpNeededForLevel(level + 1) - xp
+  }`;
+}
+
 /**
  * Similar to Unity's update, this function is used in tandem with the setInterval() function to call all functions within it and update all dynamic objects everytime it is called.
  */
 function Update() {
-  if (effort >= maxEffort) {
-    message.textContent =
-      `Effort: ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
-        XpNeededForLevel(level + 1) - xp
-      }`;
-  } else if (recoveryTime > 0) {
-    message.textContent = `Effort (${
-      Math.floor(recoveryTime)
-    }): ${effort}/${maxEffort} | Money: ${money} | Level: ${level} | XP to Next Level: ${
-      XpNeededForLevel(level + 1) - xp
-    }`;
-  }
+  DisplayStats();
 
   RecoverEffort();
 
@@ -429,14 +440,13 @@ function Update() {
     upgrade.Update();
   }
 }
+Update();
 setInterval(Update, updateSpeed * 1000);
 
 app.append(
   heading,
   image,
-  message,
-  effortButton,
-  moneyButton,
+  playerUI,
   choreGroup,
   upgradeGroup,
 );
