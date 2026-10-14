@@ -328,11 +328,11 @@ class PurchasableClass extends DynamicButtonClass {
      */
 
     if (this.amountAvailable == 0) {
+      this.button.remove();
       for (let i = 0; i < upgradeList.length; i++) {
         const upgrade = upgradeList[i];
         if (upgrade.label == this.label) {
           upgradeList.splice(i, 1);
-          upgradeGroup.removeChild(this.button);
           break;
         }
       }
@@ -427,6 +427,17 @@ class MachineClass {
     this.amount -= amountToSell;
     if (this.amount < 0) this.amount = 0;
     money += 30;
+  }
+
+  Upgrade(timerReduction: number, minTimer: number) {
+    this.Purchase(1);
+    this.maxTimer -= timerReduction;
+    //Assign the higher of he 2 numbers if maxTimer is below minTimer
+    this.maxTimer = Math.max(minTimer, this.maxTimer);
+
+    if (this.currTimer > this.maxTimer) {
+      this.currTimer = this.maxTimer;
+    }
   }
 
   toString() {
@@ -625,17 +636,41 @@ function BasicMachinePurchase(
   ownedMachines.push(machine);
 }
 
+function upgradeMachine(
+  machineName: string,
+  timerReduction: number,
+  minTimer: number,
+) {
+  for (let i = 0; i < ownedMachines.length; i++) {
+    if (ownedMachines[i].name == machineName) {
+      ownedMachines[i].Upgrade(timerReduction, minTimer);
+      return;
+    }
+  }
+}
+
 const dishwasherPurchase = new PurchasableClass(
   "Buy Dishwasher", // Button label
-  80, // Price
+  120, // Price
   () => {
     BasicMachinePurchase("Dishwasher", choreList[0], 7);
     //show dishwasher instead of blackout image
     dishwasherAppliance.Unlock();
   }, // RewardFunc
-  { levelUnlocked: 8 },
+  { levelUnlocked: 8, stock: 1 },
 );
 machineList.push(dishwasherPurchase);
+
+const dishwasherUpgrade = new PurchasableClass(
+  "Upgrade Dishwasher",
+  150,
+  () => {
+    upgradeMachine("Dishwasher", 1, 1);
+  },
+  { priceScaling: 1.8 },
+);
+dishwasherUpgrade.button.style.display = "none";
+machineList.push(dishwasherUpgrade);
 
 const washingMachinePurchase = new PurchasableClass(
   "Buy Washing Machine", // Button label
@@ -644,9 +679,20 @@ const washingMachinePurchase = new PurchasableClass(
     BasicMachinePurchase("Washing Machine", choreList[2], 10);
     washerAppliance.Unlock();
   }, // RewardFunc
-  { levelUnlocked: 5 },
+  { levelUnlocked: 5, stock: 1 },
 );
 machineList.push(washingMachinePurchase);
+
+const washingMachineUpgrade = new PurchasableClass(
+  "Upgrade Washing Machine",
+  100,
+  () => {
+    upgradeMachine("Washing Machine", 1, 1);
+  },
+  { priceScaling: 1.5 },
+);
+washingMachineUpgrade.button.style.display = "none";
+machineList.push(washingMachineUpgrade);
 
 /*machineList.push(
   new PurchasableClass(
