@@ -615,13 +615,6 @@ upgradeList.push(
 );
 
 upgradeList.push(
-  new PurchasableClass("Upgrade maximum energy", 50, () => {
-    console.log(`[maxEnergy]: Upgraded ${maxEnergy} -> ${maxEnergy - 3}`);
-    maxEnergy += 5;
-  }, { levelUnlocked: 2 }),
-);
-
-upgradeList.push(
   new PurchasableClass(
     "Upgrade recovery time",
     30,
@@ -631,8 +624,15 @@ upgradeList.push(
       );
       maxRecoveryTime -= 3;
     },
-    { priceScaling: 2, stock: 2, levelUnlocked: 4 },
+    { priceScaling: 2, stock: 2, levelUnlocked: 3 },
   ),
+);
+
+upgradeList.push(
+  new PurchasableClass("Upgrade maximum energy", 50, () => {
+    console.log(`[maxEnergy]: Upgraded ${maxEnergy} -> ${maxEnergy - 3}`);
+    maxEnergy += 5;
+  }, { levelUnlocked: 4 }),
 );
 
 upgradeList.push(
