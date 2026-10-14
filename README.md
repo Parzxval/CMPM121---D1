@@ -25,5 +25,4 @@ Tooling adapted from the [CMPM 121 Fall 2026 S01 starter](https://github.com/ucs
 
 ## Notes
 
-Serena: <br>
-In my most recent push I updated the PurchasableClass to use a cool Python style **kwargs parameter that I found online. I did this so that we can customize specific optional parameters without having to deal with the other ones that come before it in the list; Now we can just say which one we're changing and the rest will use their default! Next, I'm thinking about adding some more things to buy and tasks to do so there is some more progression for the gameplay.
+Serena: Nothing to _say_ here!

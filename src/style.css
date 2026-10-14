@@ -1,5 +1,5 @@
 .bg {
-  width: 80vw;
+  width: 60vw;
   height: auto;
 }
 
@@ -15,15 +15,18 @@ body {
 
 .automation-display {
   margin-top: -100px;
+  margin-right: 16vw;
+  /* background-color: hsl(315, 31%, 20%); */
 }
 
 .kitchen-scene {
   position: relative;
-  margin-top: -75px;
+  margin-top: -12vh;
+  margin-left: 5vw;
 }
 
 .appliance {
-  width: 80vw;
+  width: 60vw;
   height: auto;
   top: 0;
   left: 0;
@@ -48,16 +51,17 @@ body {
   top: 0px;
   right: 0px;
   height: 100vh;
-  width: 10vw;
+  width: 16vw;
   overflow-y: auto;
   padding: 10px;
   box-sizing: border-box;
+  background-color: hsl(315, 31%, 20%);
 }
 
 .stats {
   position: fixed;
   top: 20px;
-  right: calc(15vw + 10px);
+  right: calc(15vw + 20px);
   z-index: 2;
   background-color: rgba(39, 29, 34, 0.85);
   padding: 8px 12px;
@@ -88,8 +92,9 @@ body {
 
 button {
   display: block;
-  width: 100%;
-  margin-bottom: 6px;
+  width: 90%;
+  margin-bottom: 3%;
+  margin-left: 5%;
   background-color: rgb(225, 200, 168);
   color: #271d22;
   border: none;
@@ -101,4 +106,13 @@ button {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+button:hover:enabled {
+  background-color: hsl(34, 49%, 90%);
+  margin-left: 0%;
+}
+
+button:active:enabled {
+  background-color: hsl(34, 49%, 70%);
 }
