@@ -461,15 +461,21 @@ class ApplianceClass implements Interactable {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   purchasable: PurchasableClass;
+  upgrade: PurchasableClass;
+  name: string;
+  isOwned: boolean = false;
 
   constructor(
     name: string,
     lockedSrc: string,
     unlockedSrc: string,
     purchasable: PurchasableClass,
+    upgrade: PurchasableClass,
     container: HTMLElement,
   ) {
     this.purchasable = purchasable;
+    this.upgrade = upgrade;
+    this.name = name;
 
     this.lockedImg = document.createElement("img");
     this.lockedImg.src = lockedSrc;
@@ -497,14 +503,10 @@ class ApplianceClass implements Interactable {
   }
 
   IsHit(event: MouseEvent): boolean {
-    //Already bought; the locked image is hidden
-    if (this.lockedImg.style.display == "none") {
-      return false;
-    }
-
+    const img = this.isOwned ? this.unlockedImg : this.lockedImg;
     //Displayed coordinates will match image's natural coordinates
-    const scaleX = this.lockedImg.naturalWidth / this.lockedImg.clientWidth;
-    const scaleY = this.lockedImg.naturalHeight / this.lockedImg.clientHeight;
+    const scaleX = img.naturalWidth / img.clientWidth;
+    const scaleY = img.naturalHeight / img.clientHeight;
 
     const x = Math.floor(event.offsetX * scaleX);
     const y = Math.floor(event.offsetY * scaleY);
@@ -523,10 +525,18 @@ class ApplianceClass implements Interactable {
   Unlock() {
     this.lockedImg.style.display = "none";
     this.unlockedImg.style.display = "";
+    this.isOwned = true;
+    this.upgrade.button.style.display = "";
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.drawImage(this.unlockedImg, 0, 0);
   }
 
   OnClick(): void {
-    this.purchasable.Execute();
+    if (this.isOwned) {
+      this.upgrade.Execute();
+    } else {
+      this.purchasable.Execute();
+    }
   }
 
   GetHoverText(): string {
@@ -667,7 +677,7 @@ const dishwasherUpgrade = new PurchasableClass(
   () => {
     upgradeMachine("Dishwasher", 1, 1);
   },
-  { priceScaling: 1.8 },
+  { priceScaling: 1.4 },
 );
 dishwasherUpgrade.button.style.display = "none";
 machineList.push(dishwasherUpgrade);
@@ -689,7 +699,7 @@ const washingMachineUpgrade = new PurchasableClass(
   () => {
     upgradeMachine("Washing Machine", 1, 1);
   },
-  { priceScaling: 1.5 },
+  { priceScaling: 1.2 },
 );
 washingMachineUpgrade.button.style.display = "none";
 machineList.push(washingMachineUpgrade);
@@ -740,6 +750,7 @@ const dishwasherAppliance = new ApplianceClass(
   lockedDishwasher,
   dishwasher,
   dishwasherPurchase,
+  dishwasherUpgrade,
   bgContainer,
 );
 interactableList.push(dishwasherAppliance);
@@ -749,6 +760,7 @@ const washerAppliance = new ApplianceClass(
   lockedWasherDryer,
   washerDryer,
   washingMachinePurchase,
+  washingMachineUpgrade,
   bgContainer,
 );
 interactableList.push(washerAppliance);
