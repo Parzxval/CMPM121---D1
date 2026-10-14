@@ -25,4 +25,6 @@ Tooling adapted from the [CMPM 121 Fall 2026 S01 starter](https://github.com/ucs
 
 ## Notes
 
-Serena: In my most recent push I added automation. Next I'll work on making the UI that displays owned automations look better as well as some other QoL things for the automations.
+Serena: <br>
+In my most recent push I changed MachineClass to take a the whole TaskClass object instead of just a callback to the tasks AutoExecute() method. This was to help provide some more data to the machine to support the UI changes I'll describe later. I also removed the [amount] parameter cause it was kinda redundant given that I had the Purchase() & Sell() methods already. I changed the MachineClass' toString() method (and thus the UI that it displays) to show how much money & XP the machine is earning (both individually & total per cycle) in addition to what it already displayed. <br>
+Next I plan to mess with the PurchasableClass so that it is a little simpler to use. This will involve some parameter changes so keep and eye out for that.

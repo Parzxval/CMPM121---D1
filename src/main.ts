@@ -193,12 +193,12 @@ class TaskClass extends DynamicButtonClass {
       console.log(
         `${this.label} is being run automatically. Rewarding $${
           Math.floor(this.pay)
-        } and ${Math.floor(this.xp)} XP`,
+        } and ${Math.ceil(this.xp / 4)} XP`,
       );
     }
 
     money += Math.floor(this.pay);
-    xp += Math.floor(this.xp);
+    xp += Math.ceil(this.xp / 4);
 
     UpdateLevel();
   }
@@ -215,6 +215,8 @@ class TaskClass extends DynamicButtonClass {
 }
 
 /**
+ * **Important!** The parameters for this class will be changed soon
+ *
  * A class for all of the purchasables (upgrades and items) that automatically applies the event listener, tracks availability,
  * and scales cost.
  * @param label The label for this button.
@@ -327,27 +329,27 @@ class PurchasableClass extends DynamicButtonClass {
 /**
  * The class to handle all machine objects (objects that automate tasks).
  * @param machineName The name of this machine.
- * @param amount The amount of machines to in this object. AKA the amount of times to run [task].
  * @param task The task that is being automated. Should be taken from the choreList list of tasks.
  * @param iterationTime How long it takes to run [task].
+ *
+ * The parameter [amount] was removed because it was kinda redundant given that I already had the Purchase() and Sell() methods.
  */
 class MachineClass {
   debugMode: boolean = false;
 
   name: string;
   amount: number;
-  task: { (): void };
+  task: TaskClass;
   currTimer: number;
   maxTimer: number;
 
   constructor(
     machineName: string,
-    amount: number,
-    task: { (): void },
+    task: TaskClass,
     iterationTime: number,
   ) {
     this.name = machineName;
-    this.amount = amount;
+    this.amount = 0;
     this.task = task;
     this.maxTimer = iterationTime;
     this.currTimer = this.maxTimer;
@@ -369,7 +371,7 @@ class MachineClass {
         if (this.debugMode == true) {
           console.log(`[${this.name} (${this.amount})]: Task ${i}`);
         }
-        this.task();
+        this.task.AutoExecute();
       }
 
       this.currTimer = this.maxTimer;
@@ -389,9 +391,11 @@ class MachineClass {
   }
 
   toString() {
-    return (` ${this.name} (${this.amount}) in ${
-      Math.floor(this.currTimer)
-    }/${this.maxTimer} seconds`);
+    return (` ${this.name} (${this.amount}): + $${this.task.pay} and ${
+      Math.ceil(this.task.xp / 4)
+    } XP in ${Math.floor(this.currTimer)}/${this.maxTimer} seconds ($${
+      this.task.pay * this.amount
+    } & ${Math.ceil(this.task.xp / 4) * this.amount} XP per cycle)`);
   }
 }
 
@@ -480,8 +484,7 @@ const machineGroup = document.createElement("h3");
 
 function BasicMachinePurchase(
   machineName: string,
-  amount: number,
-  task: { (): void },
+  task: TaskClass,
   timer: number,
 ) {
   for (let i = 0; i < ownedMachines.length; i++) {
@@ -491,8 +494,9 @@ function BasicMachinePurchase(
       return;
     }
   }
-
-  ownedMachines.push(new MachineClass(machineName, amount, task, timer));
+  const machine: MachineClass = new MachineClass(machineName, task, timer);
+  machine.Purchase(1);
+  ownedMachines.push(machine);
 }
 
 machineList.push(
@@ -500,9 +504,7 @@ machineList.push(
     "Buy Roomba", // Button label
     80, // Price
     () => {
-      BasicMachinePurchase("Roomba", 1, () => {
-        choreList[4].AutoExecute();
-      }, 10);
+      BasicMachinePurchase("Roomba", choreList[4], 10);
     }, // RewardFunc
     1.5, // Price Scale
     -1, // Amount
@@ -515,9 +517,7 @@ machineList.push(
     "Buy Mr. Handy", // Button label
     300, // Price
     () => {
-      BasicMachinePurchase("Mr. Handy", 1, () => {
-        choreList[2].AutoExecute();
-      }, 10);
+      BasicMachinePurchase("Mr. Handy", choreList[2], 10);
     }, // RewardFunc
     1.5, // Price Scale
     -1, // Amount
@@ -530,9 +530,7 @@ machineList.push(
     "Buy Dishwasher", // Button label
     80, // Price
     () => {
-      BasicMachinePurchase("Dishwasher", 1, () => {
-        choreList[0].AutoExecute();
-      }, 7);
+      BasicMachinePurchase("Dishwasher", choreList[0], 7);
     }, // RewardFunc
     1.5, // Price Scale
     -1, // Amount
@@ -545,9 +543,7 @@ machineList.push(
     "Hire House Keeper", // Button label
     60, // Price
     () => {
-      BasicMachinePurchase("House Keeper", 1, () => {
-        choreList[3].AutoExecute();
-      }, 10);
+      BasicMachinePurchase("House Keeper", choreList[3], 10);
     }, // RewardFunc
     2.5, // Price Scale
     -1, // Amount
@@ -560,9 +556,7 @@ machineList.push(
     "Buy Toilet Gel", // Button label
     115, // Price
     () => {
-      BasicMachinePurchase("Toilet Gel", 1, () => {
-        choreList[6].AutoExecute();
-      }, 10);
+      BasicMachinePurchase("Toilet Gel", choreList[6], 10);
     }, // RewardFunc
     1.5, // Price Scale
     -1, // Amount
@@ -617,7 +611,7 @@ function RecoverEffort() {
 function DisplayStats() {
   moneyDisplay.textContent = `Money: $${money}`;
   effortDisplay.textContent =
-    `Effort: ${effort}/${maxEffort} | Recovery: +${recoveryAmount} in ${
+    `Effort: ${effort}/${maxEffort} | Recovery: +${recoveryAmount}E in ${
       Math.floor(recoveryTime)
     }/${maxRecoveryTime} seconds`;
   expDisplay.textContent = `Level: ${level} | XP to Next Level: ${
