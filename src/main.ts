@@ -51,7 +51,7 @@ effortButton.addEventListener("click", () => {
 const moneyButton = document.createElement("button");
 moneyButton.textContent = "Get money";
 moneyButton.addEventListener("click", () => {
-  money += 20;
+  money += 1000;
   // console.log(`[Get money]: Clicked`);
 });
 
@@ -184,6 +184,21 @@ class TaskClass extends DynamicButtonClass {
     }
   }
 
+  AutoExecute() {
+    if (this.debugMode == true) {
+      console.log(
+        `${this.label} is being run automatically. Rewarding $${
+          Math.floor(this.pay)
+        } and ${Math.floor(this.xp)} XP`,
+      );
+    }
+
+    money += Math.floor(this.pay);
+    xp += Math.floor(this.xp);
+
+    UpdateLevel();
+  }
+
   Update() {
     this.CheckAvailable();
 
@@ -305,6 +320,72 @@ class PurchasableClass extends DynamicButtonClass {
     }
   }
 }
+/**
+ * machineName,amount,task,iterationTime
+ */
+class MachineClass {
+  debugMode: boolean = false;
+
+  name: string;
+  amount: number;
+  task: { (): void };
+  currTimer: number;
+  maxTimer: number;
+
+  constructor(
+    machineName: string,
+    amount: number,
+    task: { (): void },
+    iterationTime: number,
+  ) {
+    this.name = machineName;
+    this.amount = amount;
+    this.task = task;
+    this.maxTimer = iterationTime;
+    this.currTimer = this.maxTimer;
+  }
+
+  Execute() {
+    if (this.debugMode == true) {
+      console.log(
+        `[${this.name} (${this.amount})]: Timer ${this.currTimer}/${this.maxTimer}`,
+      );
+    }
+    if (this.currTimer <= 0) {
+      if (this.debugMode == true) {
+        console.log(
+          `[${this.name} (${this.amount})]: Running task ${this.amount} times`,
+        );
+      }
+      for (let i = this.amount; i > 0; i--) {
+        if (this.debugMode == true) {
+          console.log(`[${this.name} (${this.amount})]: Task ${i}`);
+        }
+        this.task();
+      }
+
+      this.currTimer = this.maxTimer;
+    } else {
+      this.currTimer -= updateSpeed;
+    }
+  }
+
+  Purchase(amountToBuy: number) {
+    this.amount += amountToBuy;
+  }
+
+  Sell(amountToSell: number) {
+    this.amount -= amountToSell;
+    if (this.amount < 0) this.amount = 0;
+    money += 30;
+  }
+
+  toString() {
+    return (` ${this.name} (${this.amount}) in ${
+      Math.floor(this.currTimer)
+    }/${this.maxTimer} seconds`);
+  }
+}
 
 /** Chore List:
  * Do dishes,
@@ -321,13 +402,13 @@ const choreLabel = document.createElement("p");
 choreLabel.textContent = "Chores: ";
 choreGroup.append(choreLabel);
 
-choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0));
-choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1));
-choreList.push(new TaskClass("Do laundry", 2, 5, 2, 2));
-choreList.push(new TaskClass("Clean room", 5, 10, 2, 3));
-choreList.push(new TaskClass("Clean floors", 5, 10, 3, 4));
-choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5));
-choreList.push(new TaskClass("Clean bathroom", 7, 25, 5, 6));
+choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0)); // 0
+choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1)); // 1
+choreList.push(new TaskClass("Do laundry", 2, 5, 2, 2)); // 2
+choreList.push(new TaskClass("Clean room", 5, 10, 2, 3)); // 3
+choreList.push(new TaskClass("Clean floors", 5, 10, 3, 4)); // 4
+choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5)); // 5
+choreList.push(new TaskClass("Clean bathroom", 7, 25, 5, 6)); // 6
 
 for (let i = 0; i < choreList.length; i++) {
   const chore = choreList[i];
@@ -374,6 +455,116 @@ upgradeList.push(
 for (let i = 0; i < upgradeList.length; i++) {
   const upgrade = upgradeList[i];
   upgradeGroup.append(upgrade.button);
+}
+
+// interface faktionary {
+//   "Roomba": MachineClass;
+//   "Mr. Handy": MachineClass;
+//   "Dishwasher": MachineClass;
+//   "House Keeper": MachineClass;
+//   "Toilet Gel": MachineClass;
+// }
+
+const ownedMachines: MachineClass[] = [];
+
+const machineList: PurchasableClass[] = [];
+const machineGroup = document.createElement("h3");
+
+function BasicMachinePurchase(
+  machineName: string,
+  amount: number,
+  task: { (): void },
+  timer: number,
+) {
+  for (let i = 0; i < ownedMachines.length; i++) {
+    const machine: MachineClass = ownedMachines[i];
+    if (machine.name == machineName) {
+      machine.Purchase(1);
+      return;
+    }
+  }
+
+  ownedMachines.push(new MachineClass(machineName, amount, task, timer));
+}
+
+machineList.push(
+  new PurchasableClass(
+    "Buy Roomba", // Button label
+    80, // Price
+    () => {
+      BasicMachinePurchase("Roomba", 1, () => {
+        choreList[4].AutoExecute();
+      }, 10);
+    }, // RewardFunc
+    1.5, // Price Scale
+    -1, // Amount
+    8, // UnlockLvl
+  ),
+);
+
+machineList.push(
+  new PurchasableClass(
+    "Buy Mr. Handy", // Button label
+    300, // Price
+    () => {
+      BasicMachinePurchase("Mr. Handy", 1, () => {
+        choreList[2].AutoExecute();
+      }, 10);
+    }, // RewardFunc
+    1.5, // Price Scale
+    -1, // Amount
+    11, // UnlockLvl
+  ),
+);
+
+machineList.push(
+  new PurchasableClass(
+    "Buy Dishwasher", // Button label
+    80, // Price
+    () => {
+      BasicMachinePurchase("Dishwasher", 1, () => {
+        choreList[0].AutoExecute();
+      }, 7);
+    }, // RewardFunc
+    1.5, // Price Scale
+    -1, // Amount
+    6, // UnlockLvl
+  ),
+);
+
+machineList.push(
+  new PurchasableClass(
+    "Hire House Keeper", // Button label
+    60, // Price
+    () => {
+      BasicMachinePurchase("House Keeper", 1, () => {
+        choreList[3].AutoExecute();
+      }, 10);
+    }, // RewardFunc
+    2.5, // Price Scale
+    -1, // Amount
+    9, // UnlockLvl
+  ),
+);
+
+machineList.push(
+  new PurchasableClass(
+    "Buy Toilet Gel", // Button label
+    115, // Price
+    () => {
+      BasicMachinePurchase("Toilet Gel", 1, () => {
+        choreList[6].AutoExecute();
+      }, 10);
+    }, // RewardFunc
+    1.5, // Price Scale
+    -1, // Amount
+    14, // UnlockLvl
+  ),
+);
+
+for (let i = 0; i < machineList.length; i++) {
+  const machine = machineList[i];
+  machineGroup.append(machine.button);
 }
 
 /**
@@ -424,6 +615,14 @@ function DisplayStats() {
   expDisplay.textContent = `Level: ${level} | XP to Next Level: ${
     XpNeededForLevel(level + 1) - xp
   }`;
+  automationDisplay.textContent = `Automations: ${ownedMachines}`;
+}
+
+function Automate() {
+  for (let i = 0; i < ownedMachines.length; i++) {
+    const machine: MachineClass = ownedMachines[i];
+    machine.Execute();
+  }
 }
 
 /**
@@ -434,6 +633,8 @@ function Update() {
 
   RecoverEffort();
 
+  Automate();
+
   for (let i = 0; i < choreList.length; i++) {
     const chore = choreList[i];
     chore.Update();
@@ -442,6 +643,11 @@ function Update() {
   for (let i = 0; i < upgradeList.length; i++) {
     const upgrade = upgradeList[i];
     upgrade.Update();
+  }
+
+  for (let i = 0; i < machineList.length; i++) {
+    const machine = machineList[i];
+    machine.Update();
   }
 }
 Update();
@@ -453,4 +659,5 @@ app.append(
   playerUI,
   choreGroup,
   upgradeGroup,
+  machineGroup,
 );
