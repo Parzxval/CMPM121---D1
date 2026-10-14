@@ -26,5 +26,4 @@ Tooling adapted from the [CMPM 121 Fall 2026 S01 starter](https://github.com/ucs
 ## Notes
 
 Serena: <br>
-In my most recent push I changed MachineClass to take a the whole TaskClass object instead of just a callback to the tasks AutoExecute() method. This was to help provide some more data to the machine to support the UI changes I'll describe later. I also removed the [amount] parameter cause it was kinda redundant given that I had the Purchase() & Sell() methods already. I changed the MachineClass' toString() method (and thus the UI that it displays) to show how much money & XP the machine is earning (both individually & total per cycle) in addition to what it already displayed. <br>
-Next I plan to mess with the PurchasableClass so that it is a little simpler to use. This will involve some parameter changes so keep and eye out for that.
+In my most recent push I updated the PurchasableClass to use a cool Python style **kwargs parameter that I found online. I did this so that we can customize specific optional parameters without having to deal with the other ones that come before it in the list; Now we can just say which one we're changing and the rest will use their default! Next, I'm thinking about adding some more things to buy and tasks to do so there is some more progression for the gameplay.

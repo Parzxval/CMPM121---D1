@@ -215,16 +215,24 @@ class TaskClass extends DynamicButtonClass {
 }
 
 /**
- * **Important!** The parameters for this class will be changed soon
- *
  * A class for all of the purchasables (upgrades and items) that automatically applies the event listener, tracks availability,
  * and scales cost.
  * @param label The label for this button.
  * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
  * @param rewardFunc The function that should be run when this object is purchased.
- * @param priceScaling An optional parameter to set how the price scales with each purchase. Default: 1.5
- * @param amountAvailable An optional parameter to set how many are available to purchase. Will delete when it reaches zero.
- * Default: -1 which stands for infinite.
+ * @param options An optional parameter for further customizing the object. {priceScaling = 1.5, stock = -1, levelUnlocked = 1}. This is a
+ * special parameter that functions similarly to **kwargs in Python. If you want to change any of these parameters, just add an object with
+ * whichever key words you want defined inside like this:
+ *
+ *  @example new PurchasableClass("Example",420,choreList[69],{levelUnlocked: 42, priceScaling: 2.1})
+ *
+ * @optional options.priceScaling: An optional parameter to set how the price scales with each purchase. Default: 1.5
+ * @optional options.stock: An optional parameter to set how many are available to purchase. The object will delete itself when this reaches
+ * zero. Default: -1 for infinite.
+ * @optional options.levelUnlocked: The player level required to unlock access to this button.
+ *
+ * **kwargs functionality from: https://www.peterbe.com/plog/javascript-destructuring-like-python-kwargs-with-defaults
+ * Thanks Mr. Bengtsson!
  */
 class PurchasableClass extends DynamicButtonClass {
   cost: number;
@@ -237,20 +245,20 @@ class PurchasableClass extends DynamicButtonClass {
     label: string,
     cost: number,
     rewardFunc: { (): void },
-    priceScaling: number = 1.5,
-    amountAvailable: number = -1,
-    levelUnlocked: number = 1,
+    { priceScaling = 1.5, stock = -1, levelUnlocked = 1 } = {},
   ) {
     super(label);
     this.cost = cost;
     this.rewardFunc = rewardFunc;
-    this.amountAvailable = amountAvailable;
-    this.priceScaling = priceScaling;
-    this.levelUnlocked = levelUnlocked;
 
     this.button.addEventListener("click", () => {
       this.Execute();
     });
+
+    //  Other options
+    this.amountAvailable = stock;
+    this.priceScaling = priceScaling;
+    this.levelUnlocked = levelUnlocked;
   }
 
   IsAffordable(): boolean {
@@ -439,7 +447,7 @@ upgradeList.push(
       `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
     );
     recoveryAmount += 2;
-  }, 2),
+  }, { priceScaling: 2 }),
 );
 
 upgradeList.push(
@@ -452,8 +460,7 @@ upgradeList.push(
       );
       maxRecoveryTime -= 3;
     },
-    2,
-    4,
+    { priceScaling: 2, stock: 4 },
   ),
 );
 
@@ -481,6 +488,9 @@ const ownedMachines: MachineClass[] = [];
 
 const machineList: PurchasableClass[] = [];
 const machineGroup = document.createElement("h3");
+const machineLabel = document.createElement("p");
+machineLabel.textContent = "Automations: ";
+machineGroup.append(machineLabel);
 
 function BasicMachinePurchase(
   machineName: string,
@@ -506,9 +516,7 @@ machineList.push(
     () => {
       BasicMachinePurchase("Roomba", choreList[4], 10);
     }, // RewardFunc
-    1.5, // Price Scale
-    -1, // Amount
-    8, // UnlockLvl
+    { levelUnlocked: 8 },
   ),
 );
 
@@ -519,9 +527,7 @@ machineList.push(
     () => {
       BasicMachinePurchase("Mr. Handy", choreList[2], 10);
     }, // RewardFunc
-    1.5, // Price Scale
-    -1, // Amount
-    11, // UnlockLvl
+    { levelUnlocked: 11 },
   ),
 );
 
@@ -532,9 +538,7 @@ machineList.push(
     () => {
       BasicMachinePurchase("Dishwasher", choreList[0], 7);
     }, // RewardFunc
-    1.5, // Price Scale
-    -1, // Amount
-    6, // UnlockLvl
+    { levelUnlocked: 6 },
   ),
 );
 
@@ -545,9 +549,7 @@ machineList.push(
     () => {
       BasicMachinePurchase("House Keeper", choreList[3], 10);
     }, // RewardFunc
-    2.5, // Price Scale
-    -1, // Amount
-    9, // UnlockLvl
+    { priceScaling: 2.5, levelUnlocked: 9 },
   ),
 );
 
@@ -558,9 +560,7 @@ machineList.push(
     () => {
       BasicMachinePurchase("Toilet Gel", choreList[6], 10);
     }, // RewardFunc
-    1.5, // Price Scale
-    -1, // Amount
-    14, // UnlockLvl
+    { levelUnlocked: 15 },
   ),
 );
 
@@ -617,7 +617,7 @@ function DisplayStats() {
   expDisplay.textContent = `Level: ${level} | XP to Next Level: ${
     XpNeededForLevel(level + 1) - xp
   }`;
-  automationDisplay.textContent = `Automations: ${ownedMachines}`;
+  automationDisplay.textContent = `Owned Automations: ${ownedMachines}`;
 }
 
 // To be called inside of Update(). Runs the executions for all automated tasks
