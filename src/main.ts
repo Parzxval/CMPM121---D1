@@ -43,6 +43,22 @@ const hoverBox = document.createElement("div");
 hoverBox.className = "hoverbox";
 document.body.append(hoverBox);
 
+/**
+ * @param text to be shown on hover
+ * @param event Mouse event used for cursor position
+ * displays a message with mouse hover on interactables
+ */
+function ShowHoverBox(text: string, event: MouseEvent) {
+  hoverBox.textContent = text;
+  hoverBox.style.display = "block";
+  hoverBox.style.left = `${event.clientX + 12}px`;
+  hoverBox.style.top = `${event.clientY + 12}px`;
+}
+
+function HideHoverBox() {
+  hoverBox.style.display = "none";
+}
+
 const playerUI = document.createElement("h4");
 const moneyDisplay = document.createElement("p");
 const effortDisplay = document.createElement("p");
@@ -691,11 +707,33 @@ const washerAppliance = new ApplianceClass(
 );
 interactableList.push(washerAppliance);
 
+bgContainer.addEventListener("mousemove", (event: MouseEvent) => {
+  let hovered: Interactable | null = null;
+  for (let i = 0; i < interactableList.length; i++) {
+    if (interactableList[i].IsHit(event) == true) {
+      hovered = interactableList[i];
+      break;
+    }
+  }
+  if (hovered != null) {
+    ShowHoverBox(hovered.GetHoverText(), event);
+    bgContainer.style.cursor = "pointer";
+  } else {
+    HideHoverBox();
+    bgContainer.style.cursor = "";
+  }
+});
+
+bgContainer.addEventListener("mouseleave", () => {
+  HideHoverBox();
+  bgContainer.style.cursor = "";
+});
+
 bgContainer.addEventListener("click", (event: MouseEvent) => {
   for (let i = 0; i < interactableList.length; i++) {
-    const appliance = interactableList[i];
-    if (appliance.IsHit(event) == true) {
-      appliance.OnClick();
+    const item = interactableList[i];
+    if (item.IsHit(event) == true) {
+      item.OnClick();
       break;
     }
   }
