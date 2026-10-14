@@ -581,13 +581,13 @@ const choreLabel = document.createElement("p");
 choreLabel.textContent = "Chores: ";
 choreGroup.append(choreLabel);
 
-choreList.push(new TaskClass("Do dishes", 1, 2, 1, 0)); // 0
-choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1)); // 1
-choreList.push(new TaskClass("Do laundry", 2, 7, 2, 2)); // 2
-choreList.push(new TaskClass("Clean room", 5, 15, 2, 3)); // 3
-choreList.push(new TaskClass("Clean floors", 5, 17, 3, 4)); // 4
-choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5)); // 5
-choreList.push(new TaskClass("Clean bathroom", 7, 30, 5, 6)); // 6
+choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0)); // 0
+choreList.push(new TaskClass("Take out trash", 2, 7, 1, 1)); // 1
+choreList.push(new TaskClass("Do laundry", 2, 8, 2, 2)); // 2
+choreList.push(new TaskClass("Clean room", 5, 18, 2, 3)); // 3
+choreList.push(new TaskClass("Clean floors", 5, 20, 3, 4)); // 4
+choreList.push(new TaskClass("Clean kitchen", 7, 30, 4, 5)); // 5
+choreList.push(new TaskClass("Clean bathroom", 7, 35, 5, 8)); // 8
 
 for (let i = 0; i < choreList.length; i++) {
   const chore = choreList[i];
