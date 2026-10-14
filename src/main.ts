@@ -588,6 +588,7 @@ choreList.push(new TaskClass("Clean room", 5, 18, 2, 3)); // 3
 choreList.push(new TaskClass("Clean floors", 5, 20, 3, 4)); // 4
 choreList.push(new TaskClass("Clean kitchen", 7, 30, 4, 5)); // 5
 choreList.push(new TaskClass("Clean bathroom", 7, 35, 5, 8)); // 8
+choreList.push(new TaskClass("Clean windows", 10, 60, 6, 10)); // 10
 
 for (let i = 0; i < choreList.length; i++) {
   const chore = choreList[i];
