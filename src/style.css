@@ -1,5 +1,6 @@
 .bg {
-  width: 60vw;
+  width: min(80vw, calc((100vh - 60px) *
+    1.419)); /*0vw, or whatever width makes the image exactly fit the window's height, whichever is smaller*/
   height: auto;
 }
 
@@ -26,7 +27,7 @@ body {
 }
 
 .appliance {
-  width: 60vw;
+  width: min(80vw, calc((100vh - 60px) * 1.419));
   height: auto;
   top: 0;
   left: 0;
