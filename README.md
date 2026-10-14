@@ -58,3 +58,4 @@ In my most recent push I updated the PurchasableClass to use a cool Python style
 
 - kitchenbackground, bathroombackground: Room model designed in Arcadium3d and edited in Sketchbook.
 - Remaining assets: created using Sketchbook.
+  Serena: Nothing to _say_ here!

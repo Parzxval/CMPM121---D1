@@ -13,8 +13,8 @@ const app = document.querySelector<HTMLElement>("#app")!;
 // How many seconds should the game wait between updates?
 const updateSpeed: number = 0.25; // seconds
 
-let effort: number = 10;
-let maxEffort: number = 10;
+let energy: number = 10;
+let maxEnergy: number = 10;
 
 let maxRecoveryTime = 15;
 let recoveryTime = maxRecoveryTime;
@@ -62,31 +62,31 @@ function HideHoverBox() {
 
 const playerUI = document.createElement("h4");
 const moneyDisplay = document.createElement("p");
-const effortDisplay = document.createElement("p");
+const energyDisplay = document.createElement("p");
 const expDisplay = document.createElement("p");
 const automationDisplay = document.createElement("p");
 automationDisplay.className = "automation-display";
 
 const statsPanel = document.createElement("div");
 statsPanel.className = "stats";
-statsPanel.append(moneyDisplay, effortDisplay, expDisplay);
+statsPanel.append(moneyDisplay, energyDisplay, expDisplay);
 
 playerUI.append(
-  /*moneyDisplay, effortDisplay, expDisplay, */ automationDisplay,
+  /*moneyDisplay, energyDisplay, expDisplay, */ automationDisplay,
 ); //old UI visual with cheats
 
-//A cheater button to give me more effort
-const effortButton = document.createElement("button");
-effortButton.textContent = "Get effort";
-effortButton.addEventListener("click", () => {
-  if (effort < maxEffort) {
-    effort += 1000;
+//A cheater button to give me more energy
+const energyButton = document.createElement("button");
+energyButton.textContent = "Get energy";
+energyButton.addEventListener("click", () => {
+  if (energy < maxEnergy) {
+    energy += 1000;
   }
 
-  if (effort > maxEffort) {
-    effort = maxEffort;
+  if (energy > maxEnergy) {
+    energy = maxEnergy;
   }
-  // console.log(`[Get effort]: Clicked`);
+  // console.log(`[Get energy]: Clicked`);
 });
 
 const moneyButton = document.createElement("button");
@@ -104,19 +104,19 @@ xpButton.addEventListener("click", () => {
   // console.log(`[Get XP]: Clicked`);
 });
 
-//playerUI.append(effortButton, moneyButton, xpButton); old ui
+//playerUI.append(energyButton, moneyButton, xpButton); old ui
 const cheatLabel = document.createElement("p");
 cheatLabel.textContent = "Admin Cheats";
 cheatLabel.className = "admin-cheats";
 const cheatBar = document.createElement("div");
 cheatBar.className = "cheats";
-cheatBar.append(effortButton, moneyButton, xpButton);
+cheatBar.append(energyButton, moneyButton, xpButton);
 statsPanel.append(cheatLabel, cheatBar);
 
 /**
  * An object class for a button which can be enabled/disabled. [this.button] is a publicly accessible HTMLButtonElement object with an EventListener for "click" that calls the function inputed as [operation].
  * @param label The label for this button.
- * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
+ * @param cost The amount of Energy it takes to press this button. If no cost, put 0.
  * @param pay The amount of money this button pays.
  *
  * The [operation], [cost], and [pay] attributes were moved to the new TaskClass and PurchasableClass.
@@ -155,7 +155,7 @@ class DynamicButtonClass {
 /**
  * A class for all of the tasks that automatically applies the event listener.
  * @param label The label for this button.
- * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
+ * @param cost The amount of Energy it takes to press this button. If no cost, put 0.
  * @param pay The amount of money this button pays.
  * @param xp The amount of xp this action gives.
  * @param levelUnlocked The minimum level needed to unlock this task.
@@ -186,7 +186,7 @@ class TaskClass extends DynamicButtonClass {
   }
 
   IsAffordable(): boolean {
-    return (effort >= this.cost);
+    return (energy >= this.cost);
   }
 
   IsUnlocked(): boolean {
@@ -224,7 +224,7 @@ class TaskClass extends DynamicButtonClass {
     if (this.debugMode == true) console.log(`[${this.label}]: Clicked`);
 
     if (this.IsAffordable() == true && this.IsUnlocked() == true) {
-      effort -= this.cost;
+      energy -= this.cost;
       money += this.pay;
       xp += this.xp;
 
@@ -262,7 +262,7 @@ class TaskClass extends DynamicButtonClass {
  * A class for all of the purchasables (upgrades and items) that automatically applies the event listener, tracks availability,
  * and scales cost.
  * @param label The label for this button.
- * @param cost The amount of Effort it takes to press this button. If no cost, put 0.
+ * @param cost The amount of Energy it takes to press this button. If no cost, put 0.
  * @param rewardFunc The function that should be run when this object is purchased.
  * @param options An optional parameter for further customizing the object. {priceScaling = 1.5, stock = -1, levelUnlocked = 1}. This is a
  * special parameter that functions similarly to **kwargs in Python. If you want to change any of these parameters, just add an object with
@@ -581,9 +581,9 @@ const choreLabel = document.createElement("p");
 choreLabel.textContent = "Chores: ";
 choreGroup.append(choreLabel);
 
-choreList.push(new TaskClass("Do dishes", 1, 2, 1, 0)); // 0
-choreList.push(new TaskClass("Take out trash", 2, 5, 1, 1)); // 1
-choreList.push(new TaskClass("Do laundry", 2, 6, 2, 2)); // 2
+choreList.push(new TaskClass("Do dishes", 1, 3, 1, 0)); // 0
+choreList.push(new TaskClass("Take out trash", 2, 8, 1, 1)); // 1
+choreList.push(new TaskClass("Do laundry", 2, 10, 2, 2)); // 2
 choreList.push(new TaskClass("Clean room", 5, 15, 2, 3)); // 3
 choreList.push(new TaskClass("Clean floors", 5, 17, 3, 4)); // 4
 choreList.push(new TaskClass("Clean kitchen", 7, 25, 4, 5)); // 5
@@ -601,12 +601,24 @@ upgradeLabel.textContent = "Upgrades: ";
 upgradeGroup.append(upgradeLabel);
 
 upgradeList.push(
-  new PurchasableClass("Upgrade recovery amount", 20, () => {
-    console.log(
-      `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
-    );
-    recoveryAmount += 2;
-  }, { priceScaling: 2 }),
+  new PurchasableClass(
+    "Buy Energy Bar (+7E)",
+    10,
+    () => {
+      console.log(
+        `[Energy Bar]: Purchased ${energy} -> ${energy + 7}`,
+      );
+      energy += 7;
+    },
+    { priceScaling: 2, levelUnlocked: 1 },
+  ),
+);
+
+upgradeList.push(
+  new PurchasableClass("Upgrade maximum energy", 50, () => {
+    console.log(`[maxEnergy]: Upgraded ${maxEnergy} -> ${maxEnergy - 3}`);
+    maxEnergy += 5;
+  }, { levelUnlocked: 2 }),
 );
 
 upgradeList.push(
@@ -619,15 +631,31 @@ upgradeList.push(
       );
       maxRecoveryTime -= 3;
     },
-    { priceScaling: 2, stock: 4 },
+    { priceScaling: 2, stock: 2, levelUnlocked: 4 },
   ),
 );
 
 upgradeList.push(
-  new PurchasableClass("Upgrade maximum effort", 50, () => {
-    console.log(`[maxEffort]: Upgraded ${maxEffort} -> ${maxEffort - 3}`);
-    maxEffort += 5;
-  }),
+  new PurchasableClass("Upgrade recovery amount", 20, () => {
+    console.log(
+      `[recoveryAmount]: Upgraded ${recoveryAmount} -> ${recoveryAmount + 2}`,
+    );
+    recoveryAmount += 2;
+  }, { priceScaling: 2, levelUnlocked: 5 }),
+);
+
+upgradeList.push(
+  new PurchasableClass(
+    "Upgrade recovery time+",
+    650,
+    () => {
+      console.log(
+        `[recoveryTime]: Upgraded ${maxRecoveryTime} -> ${maxRecoveryTime - 3}`,
+      );
+      maxRecoveryTime -= 3;
+    },
+    { priceScaling: 2, stock: 2, levelUnlocked: 10 },
+  ),
 );
 
 for (let i = 0; i < upgradeList.length; i++) {
@@ -839,20 +867,20 @@ function XpNeededForLevel(lvl: number): number {
 }
 
 /**
- * When [effort] is less than [maxEffort], counts down on [recoveryTime]. When it reaches zero, it adds [recoveryAmount] back to the [effort] pool.
+ * When [energy] is less than [maxEnergy], counts down on [recoveryTime]. When it reaches zero, it adds [recoveryAmount] back to the [energy] pool.
  */
-function RecoverEffort() {
-  if (effort == maxEffort) {
+function RecoverEnergy() {
+  if (energy == maxEnergy) {
     return;
   }
 
   if (recoveryTime <= 0) {
     recoveryTime = maxRecoveryTime;
-    const effortDif = maxEffort - effort;
+    const energyDif = maxEnergy - energy;
     console.log(
-      `Recovering ${(effortDif < recoveryAmount) ? effortDif : recoveryAmount}`,
+      `Recovering ${(energyDif < recoveryAmount) ? energyDif : recoveryAmount}`,
     );
-    effort += (effortDif < recoveryAmount) ? effortDif : recoveryAmount;
+    energy += (energyDif < recoveryAmount) ? energyDif : recoveryAmount;
     return;
   }
 
@@ -861,8 +889,8 @@ function RecoverEffort() {
 
 function DisplayStats() {
   moneyDisplay.textContent = `Money: $${money}`;
-  effortDisplay.textContent =
-    `Effort: ${effort}/${maxEffort} | Recovery: +${recoveryAmount}E in ${
+  energyDisplay.textContent =
+    `Energy: ${energy}/${maxEnergy} | Recovery: +${recoveryAmount}E in ${
       Math.floor(recoveryTime)
     }/${maxRecoveryTime} seconds`;
   expDisplay.textContent = `Level: ${level} | XP to Next Level: ${
@@ -885,7 +913,7 @@ function Automate() {
 function Update() {
   DisplayStats();
 
-  RecoverEffort();
+  RecoverEnergy();
 
   Automate();
 
