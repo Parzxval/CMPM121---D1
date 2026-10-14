@@ -21,3 +21,14 @@ body {
   z-index: 1;
   pointer-events: none;
 }
+
+.hoverbox {
+  position: fixed;
+  display: none;
+  pointer-events: none;
+  z-index: 2;
+  background-color: rgb(42, 22, 37);
+  color: white;
+  padding: 6px;
+  white-space: pre-line;
+}

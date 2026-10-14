@@ -39,6 +39,10 @@ const bgContainer = document.createElement("div");
 bgContainer.className = "kitchen-scene";
 bgContainer.append(kitchenBgImg);
 
+const hoverBox = document.createElement("div");
+hoverBox.className = "hoverbox";
+document.body.append(hoverBox);
+
 const playerUI = document.createElement("h4");
 const moneyDisplay = document.createElement("p");
 const effortDisplay = document.createElement("p");
@@ -418,7 +422,13 @@ class MachineClass {
   }
 }
 
-class ApplianceClass {
+interface Interactable {
+  IsHit(event: MouseEvent): boolean;
+  GetHoverText(): string;
+  OnClick(): void;
+}
+
+class ApplianceClass implements Interactable {
   lockedImg: HTMLImageElement;
   unlockedImg: HTMLImageElement;
   canvas: HTMLCanvasElement;
@@ -486,6 +496,14 @@ class ApplianceClass {
   Unlock() {
     this.lockedImg.style.display = "none";
     this.unlockedImg.style.display = "";
+  }
+
+  OnClick(): void {
+    this.purchasable.Execute();
+  }
+
+  GetHoverText(): string {
+    return "test";
   }
 }
 
@@ -653,7 +671,7 @@ for (let i = 0; i < machineList.length; i++) {
 }
 
 //Create appliances and add to a list
-const applianceList: ApplianceClass[] = [];
+const interactableList: Interactable[] = [];
 
 const dishwasherAppliance = new ApplianceClass(
   "dishwasher",
@@ -662,7 +680,7 @@ const dishwasherAppliance = new ApplianceClass(
   dishwasherPurchase,
   bgContainer,
 );
-applianceList.push(dishwasherAppliance);
+interactableList.push(dishwasherAppliance);
 
 const washerAppliance = new ApplianceClass(
   "washer dryer",
@@ -671,13 +689,14 @@ const washerAppliance = new ApplianceClass(
   washingMachinePurchase,
   bgContainer,
 );
-applianceList.push(washerAppliance);
+interactableList.push(washerAppliance);
 
 bgContainer.addEventListener("click", (event: MouseEvent) => {
-  for (let i = 0; i < applianceList.length; i++) {
-    const appliance = applianceList[i];
+  for (let i = 0; i < interactableList.length; i++) {
+    const appliance = interactableList[i];
     if (appliance.IsHit(event) == true) {
-      appliance.purchasable.Execute();
+      appliance.OnClick();
+      break;
     }
   }
 });
