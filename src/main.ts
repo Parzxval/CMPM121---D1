@@ -788,6 +788,17 @@ machineList.push(
   ),
 );
 
+machineList.push(
+  new PurchasableClass(
+    "Robot Vacuum",
+    200,
+    () => {
+      BasicMachinePurchase("Robot Vacuum", choreList[4], 10);
+    },
+    { levelUnlocked: 18 },
+  ),
+);
+
 for (let i = 0; i < machineList.length; i++) {
   const machine = machineList[i];
   machineGroup.append(machine.button);
