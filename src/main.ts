@@ -43,7 +43,11 @@ const effortButton = document.createElement("button");
 effortButton.textContent = "Get effort";
 effortButton.addEventListener("click", () => {
   if (effort < maxEffort) {
-    effort++;
+    effort += 1000;
+  }
+
+  if (effort > maxEffort) {
+    effort = maxEffort;
   }
   // console.log(`[Get effort]: Clicked`);
 });
@@ -321,7 +325,11 @@ class PurchasableClass extends DynamicButtonClass {
   }
 }
 /**
- * machineName,amount,task,iterationTime
+ * The class to handle all machine objects (objects that automate tasks).
+ * @param machineName The name of this machine.
+ * @param amount The amount of machines to in this object. AKA the amount of times to run [task].
+ * @param task The task that is being automated. Should be taken from the choreList list of tasks.
+ * @param iterationTime How long it takes to run [task].
  */
 class MachineClass {
   debugMode: boolean = false;
@@ -618,6 +626,7 @@ function DisplayStats() {
   automationDisplay.textContent = `Automations: ${ownedMachines}`;
 }
 
+// To be called inside of Update(). Runs the executions for all automated tasks
 function Automate() {
   for (let i = 0; i < ownedMachines.length; i++) {
     const machine: MachineClass = ownedMachines[i];
