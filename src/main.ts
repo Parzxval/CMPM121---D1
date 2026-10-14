@@ -65,6 +65,7 @@ const moneyDisplay = document.createElement("p");
 const effortDisplay = document.createElement("p");
 const expDisplay = document.createElement("p");
 const automationDisplay = document.createElement("p");
+automationDisplay.className = "automation-display";
 
 const statsPanel = document.createElement("div");
 statsPanel.className = "stats";
@@ -103,7 +104,14 @@ xpButton.addEventListener("click", () => {
   // console.log(`[Get XP]: Clicked`);
 });
 
-playerUI.append(effortButton, moneyButton, xpButton);
+//playerUI.append(effortButton, moneyButton, xpButton); old ui
+const cheatLabel = document.createElement("p");
+cheatLabel.textContent = "Admin Cheats";
+cheatLabel.className = "admin-cheats";
+const cheatBar = document.createElement("div");
+cheatBar.className = "cheats";
+cheatBar.append(effortButton, moneyButton, xpButton);
+statsPanel.append(cheatLabel, cheatBar);
 
 /**
  * An object class for a button which can be enabled/disabled. [this.button] is a publicly accessible HTMLButtonElement object with an EventListener for "click" that calls the function inputed as [operation].
