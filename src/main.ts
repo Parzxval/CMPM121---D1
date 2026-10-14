@@ -65,7 +65,14 @@ const moneyDisplay = document.createElement("p");
 const effortDisplay = document.createElement("p");
 const expDisplay = document.createElement("p");
 const automationDisplay = document.createElement("p");
-playerUI.append(moneyDisplay, effortDisplay, expDisplay, automationDisplay);
+
+const statsPanel = document.createElement("div");
+statsPanel.className = "stats";
+statsPanel.append(moneyDisplay, effortDisplay, expDisplay);
+
+playerUI.append(
+  /*moneyDisplay, effortDisplay, expDisplay, */ automationDisplay,
+); //old UI visual with cheats
 
 //A cheater button to give me more effort
 const effortButton = document.createElement("button");
@@ -898,6 +905,7 @@ sidebar.append(choreGroup, upgradeGroup, machineGroup);
 
 app.append(
   heading,
+  statsPanel,
   bgContainer,
   playerUI,
   sidebar,

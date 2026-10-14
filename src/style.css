@@ -45,6 +45,20 @@ body {
   box-sizing: border-box;
 }
 
+.stats {
+  position: fixed;
+  top: 20px;
+  right: calc(15vw + 10px);
+  z-index: 2;
+  background-color: rgba(39, 29, 34, 0.85);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.stats p {
+  margin: 4px 0;
+}
+
 button {
   display: block;
   width: 100%;
