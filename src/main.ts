@@ -1,7 +1,12 @@
 // Vite turns this import into a production-safe URL. Keep it as a file so
 // even this tiny example demonstrates a separately deployed asset.
 // @deno-types="./asset-url.d.ts"
-import tileUrl from "./assets/tile.svg?no-inline";
+import kitchenBackground from "./assets/kitchenbackground.png?no-inline";
+import bathroomBackground from "./assets/bathroombackground.png?no-inline";
+import dishwasher from "./assets/dishwasher.png?no-inline";
+import washerDryer from "./assets/washerdryer.png?no-inline";
+import lockedDishwasher from "./assets/lockeddishwasher.png?no-inline";
+import lockedWasherDryer from "./assets/lockedwasherdryer.png?no-inline";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 // How many seconds should the game wait between updates?
@@ -23,13 +28,16 @@ let xp: number = 0;
 let level: number = 0;
 
 const heading = document.createElement("h1");
-heading.textContent = "D1 project";
+heading.textContent = "Chore Clicker";
 
-const image = document.createElement("img");
-image.src = tileUrl;
-image.alt = "A teal tile with a cream circle";
-image.width = 96;
-image.height = 96;
+const kitchenBgImg = document.createElement("img");
+kitchenBgImg.src = kitchenBackground;
+kitchenBgImg.alt = "A kitchen background";
+kitchenBgImg.className = "bg";
+
+const bgContainer = document.createElement("div");
+bgContainer.className = "kitchen-scene";
+bgContainer.append(kitchenBgImg);
 
 const playerUI = document.createElement("h4");
 const moneyDisplay = document.createElement("p");
@@ -316,7 +324,10 @@ class PurchasableClass extends DynamicButtonClass {
   Execute() {
     if (this.debugMode == true) console.log(`[${this.label}]: Clicked`);
 
-    if (this.IsAffordable() == true && this.IsUnlocked() == true) {
+    if (
+      this.IsAffordable() == true && this.IsUnlocked() == true &&
+      this.IsInStock() == true
+    ) {
       money -= this.cost;
       this.rewardFunc();
       if (this.amountAvailable > 0) this.amountAvailable -= 1;
@@ -407,6 +418,77 @@ class MachineClass {
   }
 }
 
+class ApplianceClass {
+  lockedImg: HTMLImageElement;
+  unlockedImg: HTMLImageElement;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  purchasable: PurchasableClass;
+
+  constructor(
+    name: string,
+    lockedSrc: string,
+    unlockedSrc: string,
+    purchasable: PurchasableClass,
+    container: HTMLElement,
+  ) {
+    this.purchasable = purchasable;
+
+    this.lockedImg = document.createElement("img");
+    this.lockedImg.src = lockedSrc;
+    this.lockedImg.alt = `A blacked out image of a ${name}`;
+    this.lockedImg.className = "appliance";
+
+    this.unlockedImg = document.createElement("img");
+    this.unlockedImg.src = unlockedSrc;
+    this.unlockedImg.alt = `Image of a ${name}`;
+    this.unlockedImg.className = "appliance";
+    this.unlockedImg.style.display = "none";
+
+    container.append(this.lockedImg, this.unlockedImg);
+
+    this.canvas = document.createElement("canvas");
+    this.ctx = this.canvas.getContext("2d", {
+      willReadFrequently: true,
+    })!;
+
+    this.lockedImg.addEventListener("load", () => {
+      this.canvas.width = this.lockedImg.naturalWidth;
+      this.canvas.height = this.lockedImg.naturalHeight;
+      this.ctx.drawImage(this.lockedImg, 0, 0);
+    });
+  }
+
+  IsHit(event: MouseEvent): boolean {
+    //Already bought; the locked image is hidden
+    if (this.lockedImg.style.display == "none") {
+      return false;
+    }
+
+    //Displayed coordinates will match image's natural coordinates
+    const scaleX = this.lockedImg.naturalWidth / this.lockedImg.clientWidth;
+    const scaleY = this.lockedImg.naturalHeight / this.lockedImg.clientHeight;
+
+    const x = Math.floor(event.offsetX * scaleX);
+    const y = Math.floor(event.offsetY * scaleY);
+
+    //prevent reading pixels outside of canvas
+    if (x < 0 || y < 0 || x >= this.canvas.width || y >= this.canvas.height) {
+      return false;
+    }
+
+    //Read the pixel's transparency
+    const alpha = this.ctx.getImageData(x, y, 1, 1).data[3];
+
+    return alpha > 10;
+  }
+
+  Unlock() {
+    this.lockedImg.style.display = "none";
+    this.unlockedImg.style.display = "";
+  }
+}
+
 /** Chore List:
  * Do dishes,
  * Clean room,
@@ -477,7 +559,7 @@ for (let i = 0; i < upgradeList.length; i++) {
 }
 
 // interface faktionary {
-//   "Roomba": MachineClass;
+//   "Washing Machine": MachineClass;
 //   "Mr. Handy": MachineClass;
 //   "Dishwasher": MachineClass;
 //   "House Keeper": MachineClass;
@@ -509,18 +591,30 @@ function BasicMachinePurchase(
   ownedMachines.push(machine);
 }
 
-machineList.push(
-  new PurchasableClass(
-    "Buy Roomba", // Button label
-    80, // Price
-    () => {
-      BasicMachinePurchase("Roomba", choreList[4], 10);
-    }, // RewardFunc
-    { levelUnlocked: 8 },
-  ),
+const dishwasherPurchase = new PurchasableClass(
+  "Buy Dishwasher", // Button label
+  80, // Price
+  () => {
+    BasicMachinePurchase("Dishwasher", choreList[0], 7);
+    //show dishwasher instead of blackout image
+    dishwasherAppliance.Unlock();
+  }, // RewardFunc
+  { levelUnlocked: 8 },
 );
+machineList.push(dishwasherPurchase);
 
-machineList.push(
+const washingMachinePurchase = new PurchasableClass(
+  "Buy Washing Machine", // Button label
+  80, // Price
+  () => {
+    BasicMachinePurchase("Washing Machine", choreList[2], 10);
+    washerAppliance.Unlock();
+  }, // RewardFunc
+  { levelUnlocked: 5 },
+);
+machineList.push(washingMachinePurchase);
+
+/*machineList.push(
   new PurchasableClass(
     "Buy Mr. Handy", // Button label
     300, // Price
@@ -529,18 +623,7 @@ machineList.push(
     }, // RewardFunc
     { levelUnlocked: 11 },
   ),
-);
-
-machineList.push(
-  new PurchasableClass(
-    "Buy Dishwasher", // Button label
-    80, // Price
-    () => {
-      BasicMachinePurchase("Dishwasher", choreList[0], 7);
-    }, // RewardFunc
-    { levelUnlocked: 6 },
-  ),
-);
+);*/
 
 machineList.push(
   new PurchasableClass(
@@ -568,6 +651,36 @@ for (let i = 0; i < machineList.length; i++) {
   const machine = machineList[i];
   machineGroup.append(machine.button);
 }
+
+//Create appliances and add to a list
+const applianceList: ApplianceClass[] = [];
+
+const dishwasherAppliance = new ApplianceClass(
+  "dishwasher",
+  lockedDishwasher,
+  dishwasher,
+  dishwasherPurchase,
+  bgContainer,
+);
+applianceList.push(dishwasherAppliance);
+
+const washerAppliance = new ApplianceClass(
+  "washer dryer",
+  lockedWasherDryer,
+  washerDryer,
+  washingMachinePurchase,
+  bgContainer,
+);
+applianceList.push(washerAppliance);
+
+bgContainer.addEventListener("click", (event: MouseEvent) => {
+  for (let i = 0; i < applianceList.length; i++) {
+    const appliance = applianceList[i];
+    if (appliance.IsHit(event) == true) {
+      appliance.purchasable.Execute();
+    }
+  }
+});
 
 /**
  * Checks xp against xpToLevel() helper function; if xp is greater than or equal to, adds a level and logs level update.
@@ -658,7 +771,7 @@ setInterval(Update, updateSpeed * 1000);
 
 app.append(
   heading,
-  image,
+  bgContainer,
   playerUI,
   choreGroup,
   upgradeGroup,

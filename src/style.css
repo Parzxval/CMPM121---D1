@@ -1,0 +1,23 @@
+.bg {
+  width: 85vw;
+  height: auto;
+}
+
+body {
+  background-color: #271d22;
+  margin: 0;
+}
+
+.kitchen-scene {
+  position: relative;
+}
+
+.appliance {
+  width: 85vw;
+  height: auto;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
