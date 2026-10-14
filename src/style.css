@@ -1,7 +1,20 @@
+.sniglet-regular {
+  font-family: "Sniglet", system-ui;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.sniglet-extrabold {
+  font-family: "Sniglet", system-ui;
+  font-weight: 800;
+  font-style: normal;
+}
+
 .bg {
   width: min(80vw, calc((100vh - 60px) *
     1.419)); /*0vw, or whatever width makes the image exactly fit the window's height, whichever is smaller*/
   height: auto;
+  margin-top: 20px;
 }
 
 h1 {
@@ -9,6 +22,7 @@ h1 {
 }
 
 body {
+  font-family: "Sniglet", system-ui;
   background-color: #271d22;
   margin: 0;
   color: white;
@@ -28,6 +42,7 @@ body {
 
 .appliance {
   width: min(80vw, calc((100vh - 60px) * 1.419));
+  margin-top: 20px;
   height: auto;
   top: 0;
   left: 0;
