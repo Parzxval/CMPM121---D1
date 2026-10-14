@@ -1,11 +1,12 @@
 .bg {
-  width: 85vw;
+  width: 80vw;
   height: auto;
 }
 
 body {
   background-color: #271d22;
   margin: 0;
+  color: white;
 }
 
 .kitchen-scene {
@@ -13,7 +14,7 @@ body {
 }
 
 .appliance {
-  width: 85vw;
+  width: 80vw;
   height: auto;
   top: 0;
   left: 0;
@@ -31,4 +32,32 @@ body {
   color: white;
   padding: 6px;
   white-space: pre-line;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  height: 100vh;
+  width: 15vh;
+  overflow-y: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+button {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  background-color: rgb(225, 200, 168);
+  color: #271d22;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

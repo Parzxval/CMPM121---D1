@@ -2,7 +2,8 @@
 // even this tiny example demonstrates a separately deployed asset.
 // @deno-types="./asset-url.d.ts"
 import kitchenBackground from "./assets/kitchenbackground.png?no-inline";
-import bathroomBackground from "./assets/bathroombackground.png?no-inline";
+// deno-lint-ignore no-unused-vars
+import bathroomBackground from "./assets/bathroombackground.png?no-inline"; //TO-DO: IMPLEMENT BATHROOM CHORES VISUALLY
 import dishwasher from "./assets/dishwasher.png?no-inline";
 import washerDryer from "./assets/washerdryer.png?no-inline";
 import lockedDishwasher from "./assets/lockeddishwasher.png?no-inline";
@@ -540,7 +541,13 @@ class ApplianceClass implements Interactable {
   }
 
   GetHoverText(): string {
-    return "test";
+    if (this.isOwned == true) {
+      return `Upgrade ${this.name}: $${this.upgrade.cost}`;
+    } else if (this.purchasable.IsUnlocked() == false) {
+      return `Locked: requires level ${this.purchasable.levelUnlocked}`;
+    } else {
+      return `Buy ${this.name}: $${this.purchasable.cost}`;
+    }
   }
 }
 
@@ -646,7 +653,7 @@ function BasicMachinePurchase(
   ownedMachines.push(machine);
 }
 
-function upgradeMachine(
+function UpgradeMachine(
   machineName: string,
   timerReduction: number,
   minTimer: number,
@@ -675,7 +682,7 @@ const dishwasherUpgrade = new PurchasableClass(
   "Upgrade Dishwasher",
   150,
   () => {
-    upgradeMachine("Dishwasher", 1, 1);
+    UpgradeMachine("Dishwasher", 1, 1);
   },
   { priceScaling: 1.4 },
 );
@@ -697,7 +704,7 @@ const washingMachineUpgrade = new PurchasableClass(
   "Upgrade Washing Machine",
   100,
   () => {
-    upgradeMachine("Washing Machine", 1, 1);
+    UpgradeMachine("Washing Machine", 1, 1);
   },
   { priceScaling: 1.2 },
 );
@@ -746,7 +753,7 @@ for (let i = 0; i < machineList.length; i++) {
 const interactableList: Interactable[] = [];
 
 const dishwasherAppliance = new ApplianceClass(
-  "dishwasher",
+  "Dishwasher",
   lockedDishwasher,
   dishwasher,
   dishwasherPurchase,
@@ -756,7 +763,7 @@ const dishwasherAppliance = new ApplianceClass(
 interactableList.push(dishwasherAppliance);
 
 const washerAppliance = new ApplianceClass(
-  "washer dryer",
+  "Washing Machine",
   lockedWasherDryer,
   washerDryer,
   washingMachinePurchase,
@@ -792,6 +799,7 @@ bgContainer.addEventListener("click", (event: MouseEvent) => {
     const item = interactableList[i];
     if (item.IsHit(event) == true) {
       item.OnClick();
+      ShowHoverBox(item.GetHoverText(), event);
       break;
     }
   }
@@ -884,11 +892,13 @@ function Update() {
 Update();
 setInterval(Update, updateSpeed * 1000);
 
+const sidebar = document.createElement("div");
+sidebar.className = "sidebar";
+sidebar.append(choreGroup, upgradeGroup, machineGroup);
+
 app.append(
   heading,
   bgContainer,
   playerUI,
-  choreGroup,
-  upgradeGroup,
-  machineGroup,
+  sidebar,
 );
